@@ -3,21 +3,23 @@ export const CONFIG = {
         VERSION: 'v1beta',
         MODEL_NAME: 'models/gemini-live-2.5-flash-preview'
     },
-    // You can change the system instruction to your liking
+    // 默认系统指令改为中文
     SYSTEM_INSTRUCTION: {
-        TEXT: 'You are my helpful assistant. You can see and hear me, and respond with voice and text. If you are asked about things you do not know, you can use the google search tool to find the answer.',
+        TEXT: '你是我的智能助手。你可以看到和听到我，并用语音和文字回复。如果被问到不知道的事情，你可以使用谷歌搜索工具来寻找答案。',
     },
-    // Default audio settings
+    // 默认设置
+    DEFAULTS: {
+        LANGUAGE: 'cmn-CN',  // 默认中文
+        VOICE: 'Aoede',      // 默认语音
+        RESPONSE_TYPE: 'audio' // 默认语音输出
+    },
+    // 默认音频设置
     AUDIO: {
         SAMPLE_RATE: 16000,
-        OUTPUT_SAMPLE_RATE: 24000,      // If you want to have fun, set this to around 14000 (u certainly will)
+        OUTPUT_SAMPLE_RATE: 24000,
         BUFFER_SIZE: 2048,
         CHANNELS: 1
-    },
-    // If you are working in the RoArm branch 
-    // ROARM: {
-    //     IP_ADDRESS: '192.168.1.4'
-    // }
-  };
-  
-  export default CONFIG; 
+    }
+};
+
+export default CONFIG; 
