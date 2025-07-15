@@ -267,7 +267,6 @@ async function resumeAudioContext() {
  */
 async function connectToWebsocket() {
     if (!apiKeyInput.value) {
-        // 这个提示可以保留，因为用户需要知道
         alert('请输入 API Key');
         return;
     }
@@ -278,6 +277,21 @@ async function connectToWebsocket() {
     localStorage.setItem('gemini_language', languageSelect.value);
     localStorage.setItem('system_instruction', systemInstructionInput.value);
     localStorage.setItem('response_type', responseTypeSelect.value);
+
+    // 获取当前北京时间
+    const beijingTime = new Date().toLocaleString('zh-CN', {
+        timeZone: 'Asia/Shanghai',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        weekday: 'long'
+    });
+
+    // 在系统指令中添加当前时间信息
+    const systemInstructionWithTime = `${systemInstructionInput.value}\n\n当前北京时间：${beijingTime}`;
 
     const config = {
         model: CONFIG.API.MODEL_NAME,
@@ -294,7 +308,7 @@ async function connectToWebsocket() {
         },
         systemInstruction: {
             parts: [{
-                text: systemInstructionInput.value
+                text: systemInstructionWithTime
             }],
         }
     };  
