@@ -75,8 +75,20 @@ configToggle.addEventListener('click', () => {
 });
 
 applyConfigButton.addEventListener('click', () => {
-    configContainer.classList.toggle('active');
-    configToggle.classList.toggle('active');
+    // 保存设置到localStorage
+    localStorage.setItem('gemini_api_key', apiKeyInput.value);
+    localStorage.setItem('gemini_voice', voiceSelect.value);
+    localStorage.setItem('gemini_language', languageSelect.value);
+    localStorage.setItem('system_instruction', systemInstructionInput.value);
+    localStorage.setItem('response_type', responseTypeSelect.value);
+    localStorage.setItem('video_fps', fpsInput.value);
+    
+    // 更新配置
+    CONFIG.SYSTEM_INSTRUCTION.TEXT = systemInstructionInput.value;
+    
+    // 关闭配置面板
+    configContainer.classList.remove('active');
+    configToggle.classList.remove('active');
 });
 
 // State variables
