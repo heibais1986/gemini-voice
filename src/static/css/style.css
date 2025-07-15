@@ -1,613 +1,319 @@
 :root {
-    --primary-color: #4285f4;
-    --secondary-color: #34a853;
-    --danger-color: #ea4335;
-    --background-color: #f0f0f0;
-    --surface-color: #fff;
-    --border-color: #ccc;
-    --text-color: #333;
-    --text-secondary: #666;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --border-radius: 8px;
+    --primary-color: #667eea;
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-color: #f093fb;
+    --success-color: #4facfe;
+    --danger-color: #ff6b6b;
+    --background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --surface-color: #ffffff;
+    --surface-hover: #f8fafc;
+    --border-color: #e2e8f0;
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --spacing-xs: 4px;
     --spacing-sm: 8px;
     --spacing-md: 16px;
     --spacing-lg: 24px;
-    --primary-color-rgb: 66, 133, 244;
+    --spacing-xl: 32px;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: sans-serif;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: var(--background);
+    color: var(--text-primary);
     min-height: 100vh;
-    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: var(--spacing-lg);
 }
 
 #app {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 1000px;
-}
-
-#logs-container {
-    border: 1px solid #ccc;
-    height: 300px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
-    scroll-behavior: smooth;
-}
-
-#logs-container:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.log-entry {
-    font-size: 0.9em;
-    margin-bottom: 5px;
-}
-
-.log-entry.system {
-    color: #080; /* Green for system messages */
-}
-
-.log-entry.user {
-    color: #008; /* Blue for user messages */
-}
-
-.log-entry.ai {
-    color: #800; /* Red for AI messages */
-}
-
-.log-entry .timestamp {
-    color: #888;
-    margin-right: 5px;
-}
-
-.log-entry .emoji {
-    margin-right: 5px;
-}
-
-#message-input {
-    width: calc(100% - 100px);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-right: 10px;
-}
-
-#send-button, #mic-button {
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #4285f4;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-#send-button:hover, #mic-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-#send-button:active, #mic-button:active {
-    transform: translateY(1px);
-}
-
-#send-button::after, #mic-button::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-}
-
-#send-button:active::after, #mic-button:active::after {
-    width: 200px;
-    height: 200px;
-}
-
-#audio-visualizer {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
     width: 100%;
-    height: 20px;
-    background-color: #eee;
-    margin-top: 10px;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.audio-bar {
-    height: 100%;
-    background-color: #4285f4;
-    width: 0%;
-}
-
-/* Add a simple animation for the audio bars */
-@keyframes audio-pulse {
-    0% {
-        transform: scaleY(1);
-    }
-    50% {
-        transform: scaleY(1.5);
-    }
-    100% {
-        transform: scaleY(1);
-    }
-}
-
-.audio-bar.active {
-    animation: audio-pulse 0.5s infinite;
-}
-
-#connect-button {
-    padding: 10px 20px;
-    margin-bottom: 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #34a853;
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-#connect-button.connected {
-    background-color: #ea4335;
-}
-
-#video-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 480px;
-    z-index: 100;
-}
-
-#video-container video {
-    width: 100%;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.video-controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 101;
-}
-
-#stop-video {
-    background: #ea4335;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#stop-video:hover {
-    background: #d33426;
-}
-
-#flip-camera {
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#camera-button {
-    background: #4285f4;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    margin-left: 8px;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-#camera-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-#camera-button:active {
-    transform: translateY(1px);
-}
-
-#camera-button::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-}
-
-#camera-button:active::after {
-    width: 200px;
-    height: 200px;
-}
-
-#camera-button.active {
-    background: #ea4335;
-}
-
-#frame-preview {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 120px;
-    height: 90px;
-    border: 2px solid rgba(66, 133, 244, 0.8);
-    border-radius: 4px;
-    background: #000;
-    z-index: 2;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-#frame-preview:hover {
-    transform: scale(1.1);
-    border-color: #4285f4;
-}
-
-#frame-preview.enlarged {
-    width: 480px;
-    height: 360px;
-    bottom: 50%;
-    right: 50%;
-    transform: translate(50%, 50%);
-    z-index: 4;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
-/* Add overlay when preview is enlarged */
-#frame-preview.enlarged::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-}
-
-/* Improve video controls visibility */
-.video-controls {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#video-container:hover .video-controls {
-    opacity: 1;
-}
-
-#screen-button {
-    background: #4285f4;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    margin-left: 8px;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-#screen-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-#screen-button:active {
-    transform: translateY(1px);
-}
-
-#screen-button::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-}
-
-#screen-button:active::after {
-    width: 200px;
-    height: 200px;
-}
-
-#screen-button.active {
-    background: #ea4335;
-}
-
-/* Add styles for screen preview */
-#screen-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #000;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    width: 480px;
-    height: 360px;
-    transition: all 0.3s ease;
-    display: none;
-    z-index: 1000;
-}
-
-#screen-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-    display: block;
-}
-
-/* Add hover effect */
-#screen-container:hover {
-    transform: scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-}
-
-/* Add a close button */
-#screen-container .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#screen-container:hover .close-button {
-    opacity: 1;
-}
-
-#screen-container .close-button:hover {
-    background: rgba(0, 0, 0, 0.8);
-}
-
-.audio-visualizers {
+    max-width: 800px;
+    height: 90vh;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.visualizer-container {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.visualizer-container label {
-    font-size: 0.8em;
-    color: #666;
-}
-
-#input-audio-visualizer,
-#audio-visualizer {
-    width: 100%;
-    height: 20px;
-    background-color: #eee;
-    border-radius: 4px;
     overflow: hidden;
 }
 
-#input-audio-visualizer .audio-bar {
-    height: 100%;
-    background-color: #34a853; /* Green for input audio */
-    width: 0%;
-}
-
-#audio-visualizer .audio-bar {
-    height: 100%;
-    background-color: #4285f4; /* Blue for output audio */
-    width: 0%;
-}
-
-/* Update the animation for both visualizers */
-@keyframes audio-pulse {
-    0% {
-        transform: scaleY(1);
-    }
-    50% {
-        transform: scaleY(1.5);
-    }
-    100% {
-        transform: scaleY(1);
-    }
-}
-
-.audio-bar.active {
-    animation: audio-pulse 0.5s infinite;
-}
-
+/* 顶部设置区域 */
 .settings {
-    margin-bottom: 10px;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
-    gap: 10px;
+    gap: var(--spacing-sm);
+    align-items: center;
+    background: var(--surface-hover);
 }
 
 #api-key {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 300px;
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    transition: all 0.2s ease;
 }
 
-#voice-select  #response-type-select{
-    padding: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
- 
-/* Configuration panel */
-#config-container {
-    background: var(--surface-color);
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    display: none;
+#api-key:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-#config-container.active {
-    display: block;
-}
-.config-wrapper {
-    display: grid;
-    gap: var(--spacing-md);
-    max-width: 600px;
-    margin: 0 auto;
-}
-#apply-config {
-    padding: var(--spacing-md);
-    background-color: var(--primary-color);
+#config-toggle {
+    padding: var(--spacing-sm);
+    background: var(--primary-gradient);
     color: white;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-#apply-config:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+#config-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
-#system-instruction {
+/* 聊天消息区域 */
+#logs-container {
+    flex: 1;
     padding: var(--spacing-md);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: 14px;
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-    #app {
-        padding: var(--spacing-sm);
-        width: 96%;
-    }
-
-    .hidden-mobile {
-        display: none;
-    }
-
-    #config-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 1000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        overflow-y: auto;
-        display: block;
-        background: var(--surface-color);
-        padding: var(--spacing-lg);
-    }
-
-    #config-container.active {
-        transform: translateX(0);
-    }
-
-    .logs-wrapper {
-        max-height: 30vh;
-    }
-
-    #logs-container {
-        max-height: calc(30vh - 50px);
-    }
-
-    .input-controls {
-        position: sticky;
-        bottom: 0;
-        background: var(--surface-color);
-        padding: var(--spacing-md);
-        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-        z-index: 100;
-    }
-
-    .action-buttons {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    #video-container {
-        width: 60%;
-        max-height: 40vh;
-        bottom: 0;
-        right: 0;
-    }
-
-    #screen-container {
-        width: 100%;
-        height: 50vh;
-        bottom: 0;
-        left: 0;
-        right: auto;
-    }
-}
-
-.setting-container {
+    overflow-y: auto;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: var(--spacing-md);
 }
 
-.setting-label {
-    font-size: 12px;
-    font-weight: bold;
+.log-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    max-width: 80%;
+    animation: slideIn 0.3s ease;
 }
 
+.log-entry.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
 
-.fps-help {
-    color: #666;
-    font-size: 12px;
+.log-entry.ai {
+    align-self: flex-start;
+}
+
+.log-entry.system {
+    align-self: center;
+    max-width: 60%;
+    opacity: 0.7;
+}
+
+.log-entry .emoji {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.log-entry.user .emoji {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.log-entry.ai .emoji {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.log-entry.system .emoji {
+    background: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.log-entry span:not(.emoji) {
+    background: var(--surface-hover);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.log-entry.user span:not(.emoji) {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.log-entry.ai span:not(.emoji) {
+    background: var(--surface-hover);
+    border: 1px solid var(--border-color);
+}
+
+/* 输入区域 */
+.input-controls {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    background: var(--surface-color);
+}
+
+.message-input-container {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+#message-input {
+    flex: 1;
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    transition: all 0.2s ease;
+}
+
+#message-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#send-button {
+    padding: var(--spacing-md);
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 80px;
+}
+
+#send-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+#send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 操作按钮 */
+.action-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+.action-buttons button {
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 48px;
+}
+
+.action-buttons button:hover:not(:disabled) {
+    background: var(--surface-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.action-buttons button.active {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: transparent;
+}
+
+.action-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#connect-button {
+    background: var(--success-color);
+    color: white;
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: var(--spacing-md);
+}
+
+#connect-button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+#connect-button.connected {
+    background: var(--danger-color);
+}
+
+/* 动画 */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 隐藏技术细节 */
+.audio-visualizers,
+#video-container,
+#screen-container {
+    display: none !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        padding: var(--spacing-sm);
+    }
+    
+    #app {
+        height: 95vh;
+    }
+    
+    .log-entry {
+        max-width: 90%;
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
+    }
 }

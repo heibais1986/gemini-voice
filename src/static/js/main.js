@@ -39,20 +39,18 @@ systemInstructionInput.value = CONFIG.SYSTEM_INSTRUCTION.TEXT;
 const applyConfigButton = document.getElementById('apply-config');
 const responseTypeSelect = document.getElementById('response-type-select');
 
-// Load saved values from localStorage
+// 加载保存的值或使用默认值
 const savedApiKey = localStorage.getItem('gemini_api_key');
-const savedVoice = localStorage.getItem('gemini_voice');
-const savedLanguage = localStorage.getItem('gemini_language');
+const savedVoice = localStorage.getItem('gemini_voice') || CONFIG.DEFAULTS.VOICE;
+const savedLanguage = localStorage.getItem('gemini_language') || CONFIG.DEFAULTS.LANGUAGE;
 const savedFPS = localStorage.getItem('video_fps');
-const savedSystemInstruction = localStorage.getItem('system_instruction');
-
+const savedSystemInstruction = localStorage.getItem('system_instruction') || CONFIG.SYSTEM_INSTRUCTION.TEXT;
+const savedResponseType = localStorage.getItem('response_type') || CONFIG.DEFAULTS.RESPONSE_TYPE;
 
 if (savedApiKey) {
     apiKeyInput.value = savedApiKey;
 }
-if (savedVoice) {
-    voiceSelect.value = savedVoice;
-}
+voiceSelect.value = savedVoice;
 
 languages.forEach(lang => {
     const option = document.createElement('option');
@@ -61,17 +59,14 @@ languages.forEach(lang => {
     languageSelect.appendChild(option);
 });
 
-if (savedLanguage) {
-    languageSelect.value = savedLanguage;
-}
+languageSelect.value = savedLanguage;
+responseTypeSelect.value = savedResponseType;
 
 if (savedFPS) {
     fpsInput.value = savedFPS;
 }
-if (savedSystemInstruction) {
-    systemInstructionInput.value = savedSystemInstruction;
-    CONFIG.SYSTEM_INSTRUCTION.TEXT = savedSystemInstruction;
-}
+systemInstructionInput.value = savedSystemInstruction;
+CONFIG.SYSTEM_INSTRUCTION.TEXT = savedSystemInstruction;
 
 // Handle configuration panel toggle
 configToggle.addEventListener('click', () => {
@@ -267,6 +262,7 @@ async function connectToWebsocket() {
     localStorage.setItem('gemini_voice', voiceSelect.value);
     localStorage.setItem('gemini_language', languageSelect.value);
     localStorage.setItem('system_instruction', systemInstructionInput.value);
+    localStorage.setItem('response_type', responseTypeSelect.value);
 
     const config = {
         model: CONFIG.API.MODEL_NAME,
