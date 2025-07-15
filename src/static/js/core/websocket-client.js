@@ -24,6 +24,8 @@ export class MultimodalLiveClient extends EventEmitter {
         this.baseUrl  = `${wsProtocol}//${window.location.host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
         this.ws = null;
         this.config = null;
+        this.apiKey = null;
+        this.isConnecting = false;
         this.send = this.send.bind(this);
         this.toolManager = new ToolManager();
     }
@@ -56,7 +58,7 @@ export class MultimodalLiveClient extends EventEmitter {
      * @returns {Promise<boolean>} - Resolves with true when the connection is established.
      * @throws {ApplicationError} - Throws an error if the connection fails.
      */
-    connect(config,apiKey) {
+    async connect(config, apiKey) {
         this.config = {
             ...config,
             tools: [
@@ -64,60 +66,94 @@ export class MultimodalLiveClient extends EventEmitter {
                 ...(config.tools || [])
             ]
         };
-        const ws = new WebSocket(`${this.baseUrl}?key=${apiKey}`);
+        this.apiKey = apiKey;
+        return this._connect();
+    }
 
-        ws.addEventListener('message', async (evt) => {
-            if (evt.data instanceof Blob) {
-                this.receive(evt.data);
-            } else {
-                console.log('Non-blob message', evt);
-            }
-        });
+    async _connect() {
+        if (this.isConnecting) return false;
+        this.isConnecting = true;
 
-        return new Promise((resolve, reject) => {
-            const onError = (ev) => {
-                this.disconnect(ws);
-                const message = `Could not connect to "${this.url}"`;
-                this.log(`server.${ev.type}`, message);
-                throw new ApplicationError(
-                    message,
-                    ErrorCodes.WEBSOCKET_CONNECTION_FAILED,
-                    { originalError: ev }
-                );
-            };
-
-            ws.addEventListener('error', onError);
-            ws.addEventListener('open', (ev) => {
-                if (!this.config) {
-                    reject('Invalid config sent to `connect(config)`');
-                    return;
+        try {
+            const ws = new WebSocket(`${this.baseUrl}?key=${this.apiKey}`);
+            
+            ws.addEventListener('message', async (evt) => {
+                if (evt.data instanceof Blob) {
+                    this.receive(evt.data);
+                } else {
+                    console.log('Non-blob message', evt);
                 }
-                this.log(`client.${ev.type}`, 'Connected to socket');
-                this.emit('open');
-
-                this.ws = ws;
-
-                const setupMessage = { setup: this.config };
-                this._sendDirect(setupMessage);
-                this.log('client.send', 'setup');
-
-                ws.removeEventListener('error', onError);
-                ws.addEventListener('close', (ev) => {
-                    this.disconnect(ws);
-                    let reason = ev.reason || '';
-                    if (reason.toLowerCase().includes('error')) {
-                        const prelude = 'ERROR]';
-                        const preludeIndex = reason.indexOf(prelude);
-                        if (preludeIndex > 0) {
-                            reason = reason.slice(preludeIndex + prelude.length + 1);
-                        }
-                    }
-                    this.log(`server.${ev.type}`, `Disconnected ${reason ? `with reason: ${reason}` : ''}`);
-                    this.emit('close', { code: ev.code, reason });
-                });
-                resolve(true);
             });
-        });
+
+            return new Promise((resolve, reject) => {
+                const onError = (ev) => {
+                    this.isConnecting = false;
+                    this.disconnect(ws);
+                    const message = `Could not connect to "${this.baseUrl}"`;
+                    this.log(`server.${ev.type}`, message);
+                    reject(new ApplicationError(
+                        message,
+                        ErrorCodes.WEBSOCKET_CONNECTION_FAILED,
+                        { originalError: ev }
+                    ));
+                };
+
+                ws.addEventListener('error', onError);
+                ws.addEventListener('open', (ev) => {
+                    if (!this.config) {
+                        this.isConnecting = false;
+                        reject('Invalid config sent to `connect(config)`');
+                        return;
+                    }
+                    this.log(`client.${ev.type}`, 'Connected to socket');
+                    this.emit('open');
+
+                    this.ws = ws;
+                    this.isConnecting = false;
+
+                    const setupMessage = { setup: this.config };
+                    this._sendDirect(setupMessage);
+                    this.log('client.send', 'setup');
+
+                    ws.removeEventListener('error', onError);
+                    ws.addEventListener('close', (ev) => {
+                        this.disconnect(ws);
+                        let reason = ev.reason || '';
+                        if (reason.toLowerCase().includes('error')) {
+                            const prelude = 'ERROR]';
+                            const preludeIndex = reason.indexOf(prelude);
+                            if (preludeIndex > 0) {
+                                reason = reason.slice(preludeIndex + prelude.length + 1);
+                            }
+                        }
+                        this.log(`server.${ev.type}`, `Disconnected ${reason ? `with reason: ${reason}` : ''}`);
+                        this.emit('close', { code: ev.code, reason });
+                    });
+                    resolve(true);
+                });
+            });
+        } catch (error) {
+            this.isConnecting = false;
+            throw error;
+        }
+    }
+
+    async _ensureConnection() {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+            this.log('client.reconnect', 'Connection lost, attempting to reconnect...');
+            this.emit('reconnecting');
+            try {
+                await this._connect();
+                this.log('client.reconnect', 'Reconnected successfully');
+                this.emit('reconnected');
+                return true;
+            } catch (error) {
+                this.log('client.reconnect', `Reconnection failed: ${error.message}`);
+                this.emit('reconnectFailed', error);
+                throw error;
+            }
+        }
+        return true;
     }
 
     /**
@@ -244,7 +280,17 @@ export class MultimodalLiveClient extends EventEmitter {
      * @param {string|Object|Array} parts - The message parts to send. Can be a string, an object, or an array of strings/objects.
      * @param {boolean} [turnComplete=true] - Indicates if this message completes the current turn.
      */
-    send(parts, turnComplete = true) {
+    async send(parts, turnComplete = true) {
+        try {
+            await this._ensureConnection();
+        } catch (error) {
+            throw new ApplicationError(
+                'Failed to send message: connection unavailable',
+                ErrorCodes.WEBSOCKET_CONNECTION_FAILED,
+                { originalError: error }
+            );
+        }
+
         parts = Array.isArray(parts) ? parts : [parts];
         const formattedParts = parts.map(part => {
             if (typeof part === 'string') {

@@ -433,6 +433,20 @@ client.on('message', (message) => {
     }
 });
 
+client.on('reconnecting', () => {
+    logMessage('Connection lost, reconnecting...', 'system');
+});
+
+client.on('reconnected', () => {
+    logMessage('Reconnected successfully', 'system');
+});
+
+client.on('reconnectFailed', (error) => {
+    logMessage(`Reconnection failed: ${error.message}`, 'system');
+    // 可以选择重置连接状态
+    disconnectFromWebsocket();
+});
+
 sendButton.addEventListener('click', handleSendMessage);
 messageInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
