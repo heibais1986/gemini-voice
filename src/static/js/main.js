@@ -112,20 +112,17 @@ const client = new MultimodalLiveClient();
  * @param {string} [type='system'] - The type of the message (system, user, ai).
  */
 function logMessage(message, type = 'system') {
+    // 只显示用户和AI的消息，过滤掉系统消息
+    if (type !== 'user' && type !== 'ai') {
+        return;
+    }
+
     const logEntry = document.createElement('div');
     logEntry.classList.add('log-entry', type);
-
-    const timestamp = document.createElement('span');
-    timestamp.classList.add('timestamp');
-    timestamp.textContent = new Date().toLocaleTimeString();
-    logEntry.appendChild(timestamp);
 
     const emoji = document.createElement('span');
     emoji.classList.add('emoji');
     switch (type) {
-        case 'system':
-            emoji.textContent = '⚙️';
-            break;
         case 'user':
             emoji.textContent = '🫵';
             break;
@@ -141,6 +138,11 @@ function logMessage(message, type = 'system') {
 
     logsContainer.appendChild(logEntry);
     logsContainer.scrollTop = logsContainer.scrollHeight;
+}
+
+// 添加一个专门的系统日志函数，用于开发调试（不显示在UI上）
+function logSystem(message) {
+    console.log(`[System] ${message}`);
 }
 
 /**
@@ -209,7 +211,7 @@ async function handleMicToggle() {
                     client.sendRealtimeInput([{
                         mimeType: "audio/pcm;rate=16000",
                         data: base64Data,
-                        interrupt: true     // Model isn't interruptable when using tools, so we do it manually
+                        interrupt: true
                     }]);
                 } else {
                     client.sendRealtimeInput([{
@@ -230,11 +232,11 @@ async function handleMicToggle() {
             await audioStreamer.resume();
             isRecording = true;
             Logger.info('Microphone started');
-            logMessage('Microphone started', 'system');
+            logSystem('Microphone started');
             updateMicIcon();
         } catch (error) {
             Logger.error('Microphone error:', error);
-            logMessage(`Error: ${error.message}`, 'system');
+            logSystem(`Microphone error: ${error.message}`);
             isRecording = false;
             updateMicIcon();
         }
@@ -243,7 +245,7 @@ async function handleMicToggle() {
             audioRecorder.stop();
         }
         isRecording = false;
-        logMessage('Microphone stopped', 'system');
+        logSystem('Microphone stopped');
         updateMicIcon();
         updateAudioVisualizer(0, true);
     }
@@ -265,7 +267,8 @@ async function resumeAudioContext() {
  */
 async function connectToWebsocket() {
     if (!apiKeyInput.value) {
-        logMessage('Please input API Key', 'system');
+        // 这个提示可以保留，因为用户需要知道
+        alert('请输入 API Key');
         return;
     }
 
@@ -284,15 +287,14 @@ async function connectToWebsocket() {
                 languageCode: languageSelect.value,
                 voiceConfig: { 
                     prebuiltVoiceConfig: { 
-                        voiceName: voiceSelect.value    // You can change voice in the config.js file
+                        voiceName: voiceSelect.value
                     }
                 }
             },
-
         },
         systemInstruction: {
             parts: [{
-                text: systemInstructionInput.value     // You can change system instruction in the config.js file
+                text: systemInstructionInput.value
             }],
         }
     };  
@@ -301,20 +303,21 @@ async function connectToWebsocket() {
         await client.connect(config,apiKeyInput.value);
         isConnected = true;
         await resumeAudioContext();
-        connectButton.textContent = 'Disconnect';
+        connectButton.textContent = '断开连接';
         connectButton.classList.add('connected');
         messageInput.disabled = false;
         sendButton.disabled = false;
         micButton.disabled = false;
         cameraButton.disabled = false;
         screenButton.disabled = false;
-        logMessage('Connected to Gemini Multimodal Live API', 'system');
+        logSystem('Connected to Gemini Multimodal Live API');
     } catch (error) {
         const errorMessage = error.message || 'Unknown error';
         Logger.error('Connection error:', error);
-        logMessage(`Connection error: ${errorMessage}`, 'system');
+        logSystem(`Connection error: ${errorMessage}`);
+        alert(`连接失败: ${errorMessage}`);
         isConnected = false;
-        connectButton.textContent = 'Connect';
+        connectButton.textContent = '连接';
         connectButton.classList.remove('connected');
         messageInput.disabled = true;
         sendButton.disabled = true;
@@ -339,14 +342,14 @@ function disconnectFromWebsocket() {
         isRecording = false;
         updateMicIcon();
     }
-    connectButton.textContent = 'Connect';
+    connectButton.textContent = '连接';
     connectButton.classList.remove('connected');
     messageInput.disabled = true;
     sendButton.disabled = true;
     micButton.disabled = true;
     cameraButton.disabled = true;
     screenButton.disabled = true;
-    logMessage('Disconnected from server', 'system');
+    logSystem('Disconnected from server');
     
     if (videoManager) {
         stopVideo();
@@ -371,15 +374,15 @@ function handleSendMessage() {
 
 // Event Listeners
 client.on('open', () => {
-    logMessage('WebSocket connection opened', 'system');
+    logSystem('WebSocket connection opened');
 });
 
 client.on('log', (log) => {
-    logMessage(`${log.type}: ${JSON.stringify(log.message)}`, 'system');
+    logSystem(`${log.type}: ${JSON.stringify(log.message)}`);
 });
 
 client.on('close', (event) => {
-    logMessage(`WebSocket connection closed (code ${event.code})`, 'system');
+    logSystem(`WebSocket connection closed (code ${event.code})`);
 });
 
 client.on('audio', async (data) => {
@@ -388,7 +391,7 @@ client.on('audio', async (data) => {
         const streamer = await ensureAudioInitialized();
         streamer.addPCM16(new Uint8Array(data));
     } catch (error) {
-        logMessage(`Error processing audio: ${error.message}`, 'system');
+        logSystem(`Error processing audio: ${error.message}`);
     }
 });
 
@@ -413,16 +416,16 @@ client.on('interrupted', () => {
     audioStreamer?.stop();
     isUsingTool = false;
     Logger.info('Model interrupted');
-    logMessage('Model interrupted', 'system');
+    logSystem('Model interrupted');
 });
 
 client.on('setupcomplete', () => {
-    logMessage('Setup complete', 'system');
+    logSystem('Setup complete');
 });
 
 client.on('turncomplete', () => {
     isUsingTool = false;
-    logMessage('Turn complete', 'system');
+    logSystem('Turn complete');
 });
 
 client.on('error', (error) => {
@@ -431,27 +434,26 @@ client.on('error', (error) => {
     } else {
         Logger.error('Unexpected error', error);
     }
-    logMessage(`Error: ${error.message}`, 'system');
+    logSystem(`Error: ${error.message}`);
 });
 
 client.on('message', (message) => {
     if (message.error) {
         Logger.error('Server error:', message.error);
-        logMessage(`Server error: ${message.error}`, 'system');
+        logSystem(`Server error: ${message.error}`);
     }
 });
 
 client.on('reconnecting', () => {
-    logMessage('Connection lost, reconnecting...', 'system');
+    logSystem('Connection lost, reconnecting...');
 });
 
 client.on('reconnected', () => {
-    logMessage('Reconnected successfully', 'system');
+    logSystem('Reconnected successfully');
 });
 
 client.on('reconnectFailed', (error) => {
-    logMessage(`Reconnection failed: ${error.message}`, 'system');
-    // 可以选择重置连接状态
+    logSystem(`Reconnection failed: ${error.message}`);
     disconnectFromWebsocket();
 });
 
@@ -503,11 +505,12 @@ async function handleVideoToggle() {
             cameraIcon.textContent = 'videocam_off';
             cameraButton.classList.add('active');
             Logger.info('Camera started successfully');
-            logMessage('Camera started', 'system');
+            logSystem('Camera started');
 
         } catch (error) {
             Logger.error('Camera error:', error);
-            logMessage(`Error: ${error.message}`, 'system');
+            logSystem(`Camera error: ${error.message}`);
+            alert(`摄像头错误: ${error.message}`);
             isVideoActive = false;
             videoManager = null;
             cameraIcon.textContent = 'videocam';
