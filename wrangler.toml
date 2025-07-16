@@ -1,224 +1,903 @@
-<<<<<<<
+
 #:schema node_modules/wrangler/config-schema.json
 
-=======
-#:schema node_modules/wrangler/config-schema.json
-
-name = "gemini-playground"
+name = "gemini-voice"
 
 main = "src/index.js"
 
 compatibility_date = "2024-12-30"
 
 compatibility_flags = ["nodejs_compat"]
+
+>>>>>>>
+
+
+#:schema node_modules/wrangler/config-schema.json
+
+
+
+
+
+
+
+=======
+
+
+
+#:schema node_modules/wrangler/config-schema.json
+
+
+
+
+
+
+
+name = "gemini-playground"
+
+
+
+
+
+
+
+main = "src/index.js"
+
+
+
+
+
+
+
+compatibility_date = "2024-12-30"
+
+
+
+
+
+
+
+compatibility_flags = ["nodejs_compat"]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 # 静态资源配置
 
+
+
+
+
+
+
 # 将 src/static 目录下的文件作为静态资源提供服务
+
+
+
+
+
+
 
 assets = { directory = "./src/static" }
 
+
+
+
+
+
+
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 name = "gemini-playground"
 
+
+
+
+
+
+
 =======
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 监控和日志配置
 
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # Workers Logs - 启用日志记录，便于调试和监控
 
+
+
+
+
+
+
 # 文档: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
+
+
+
+
+
+
 
 [observability]
 
+
+
+
+
+
+
 enabled = true
+
+
+
+
+
+
 
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 main = "src/index.js"
 
+
+
+
+
+
+
 =======
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 智能放置配置（可选）
 
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 自动将工作负载放置在最佳位置以最小化延迟
 
+
+
+
+
+
+
 # 对于后端逻辑，放置在靠近后端基础设施而非最终用户的位置可能会有更好的性能
+
+
+
+
+
+
 
 # 文档: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 
+
+
+
+
+
+
 # [placement]
+
+
+
+
+
+
 
 # mode = "smart"
 
+
+
+
+
+
+
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 compatibility_date = "2024-12-30"
 
+
+
+
+
+
+
 =======
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 环境变量配置
 
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 变量绑定：这些是任意的纯文本字符串（类似于环境变量）
 
+
+
+
+
+
+
 # 文档: https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+
+
+
+
+
+
 
 # 注意：敏感数据请使用 Secrets 存储
 
+
+
+
+
+
+
 # 文档: https://developers.cloudflare.com/workers/configuration/secrets/
+
+
+
+
+
+
 
 [vars]
 
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 网络配置 - 解决中国大陆访问限制问题
 
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 可配置的Gemini API基础URL，默认使用官方域名
 
+
+
+
+
+
+
 # 如果无法访问可以设置为代理域名
 
+
+
+
+
+
+
 GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com"
+
+
+
+
+
+
 
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 compatibility_flags = ["nodejs_compat"]
 
+
+
+
+
+
+
 =======
+
+
+
 # 备用域名列表，当主域名无法访问时自动尝试
 
+
+
+
+
+
+
 # 多个域名用逗号分隔，支持故障转移
+
+
+
+
+
+
 
 GEMINI_API_FALLBACK_URLS = "https://generativelanguage.googleapis.com"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 用户系统配置 - 非敏感的公开信息
 
+
+
+
+
+
+
 # =============================================================================
 
+
+
+
+
+
+
 # 微信应用ID（公开信息，可以暴露在前端）
+
+
+
+
+
+
 
 WECHAT_APP_ID = "your-wechat-app-id"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # 支付宝应用ID（公开信息，可以暴露在前端）
+
+
+
+
+
+
 
 ALIPAY_APP_ID = "your-alipay-app-id"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # 微信支付商户号（公开信息，可以暴露在前端）
+
+
+
+
+
+
 
 WECHAT_PAY_MCH_ID = "your-wechat-pay-mch-id"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # 系统配置
+
+
+
+
+
+
 
 APP_NAME = "Gemini Playground"
 
+
+
+
+
+
+
 APP_VERSION = "2.0.0"
+
+
+
+
+
+
 
 ENVIRONMENT = "production"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # API限制配置
 
+
+
+
+
+
+
 MAX_DAILY_API_CALLS_FREE = "100"      # 免费用户每日API调用限制
+
+
+
+
+
+
 
 MAX_DAILY_API_CALLS_PREMIUM = "10000" # 付费用户每日API调用限制
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # 支付配置
 
+
+
+
+
+
+
 PREMIUM_PRICE = "20.00"               # 年费价格（元）
+
+
+
+
+
+
 
 PREMIUM_DURATION_DAYS = "365"         # 年费有效期（天）
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 🔐 敏感信息安全提醒
 
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # ⚠️ 重要：以下敏感信息已移至 Cloudflare Secrets，不要在此文件中设置！
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 必需的密钥（通过 wrangler secret put 命令设置）：
 
+
+
+
+
+
+
 # - SERVER_GEMINI_API_KEY: 服务器的Gemini API Key（付费用户使用）
+
+
+
+
+
+
 
 # - JWT_SECRET: JWT签名密钥（64位随机字符串）
 
+
+
+
+
+
+
 # - ENCRYPTION_KEY: 数据加密密钥（32位随机字符串）
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 可选的密钥（根据功能需要设置）：
 
+
+
+
+
+
+
 # - WECHAT_APP_SECRET: 微信应用密钥（微信登录功能）
+
+
+
+
+
+
 
 # - ALIPAY_PRIVATE_KEY: 支付宝应用私钥（支付宝支付功能）
 
+
+
+
+
+
+
 # - ALIPAY_PUBLIC_KEY: 支付宝公钥（支付宝支付功能）
+
+
+
+
+
+
 
 # - WECHAT_PAY_API_KEY: 微信支付API密钥（微信支付功能）
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 设置方法：
 
+
+
+
+
+
+
 # 1. 自动化脚本：npm run setup-secrets
+
+
+
+
+
+
 
 # 2. 手动设置：wrangler secret put <SECRET_NAME>
 
+
+
+
+
+
+
 # 3. 查看已设置的密钥：wrangler secret list
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 详细说明请参考：SECRETS_MANAGEMENT.md
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
+
+
+
+
+
+
 
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#workers-ai
 
+
+
+
+
+
+
 # [ai]
+
+
+
+
+
+
 
 # binding = "AI"
 
+
+
+
+
+
+
 >>>>>>>
+
+
+
+
+
+
+
+
+
 
 
 assets = { directory = "./src/static" }
@@ -229,61 +908,271 @@ assets = { directory = "./src/static" }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 # Workers Logs
 
+
+
+
+
+
+
 =======
+
+
+
 # Bind a D1 database. D1 is Cloudflare’s native serverless SQL database.
+
+
+
+
+
+
 
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases
 
+
+
+
+
+
+
 [[d1_databases]]
+
+
+
+
+
+
 
 binding = "DB"                                    # 在代码中通过 env.DB 访问
 
+
+
+
+
+
+
 database_name = "gemini-playground-db"            # 数据库名称
 
+
+
+
+
+
+
 database_id = "your-database-id-here"            # ⚠️ 需要创建数据库后替换为实际ID
+
+
+
+
+
+
 
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 # Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
 
+
+
+
+
+
+
 =======
+
+
+
 # 数据库操作命令：
+
+
+
+
+
+
 
 # 创建数据库：wrangler d1 create gemini-playground-db
 
+
+
+
+
+
+
 # 初始化数据库：wrangler d1 execute gemini-playground-db --file=database/init.sql
+
+
+
+
+
+
 
 # 查看数据库：wrangler d1 execute gemini-playground-db --command="SELECT COUNT(*) FROM users"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind a dispatch namespace. Use Workers for Platforms to deploy serverless functions programmatically on behalf of your customers.
+
+
+
+
+
+
 
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#dispatch-namespace-bindings-workers-for-platforms
 
+
+
+
+
+
+
 # [[dispatch_namespaces]]
+
+
+
+
+
+
 
 # binding = "MY_DISPATCHER"
 
+
+
+
+
+
+
 # namespace = "my-namespace"
 
+
+
+
+
+
+
 >>>>>>>
+
+
+
+
+
+
+
+
+
 
 
 # Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 [observability]
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 enabled = true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -295,7 +1184,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -303,7 +1216,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -311,8 +1248,47 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 # mode = "smart"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -324,7 +1300,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Docs:
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -332,7 +1332,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Note: Use secrets to store sensitive data.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -340,7 +1364,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [vars]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -352,7 +1400,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -360,7 +1444,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [ai]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -372,7 +1480,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind an Analytics Engine dataset. Use Analytics Engine to write analytics within your Pages Function.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -380,7 +1524,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[analytics_engine_datasets]]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -392,7 +1560,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind a headless browser instance running on Cloudflare's global network.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -400,7 +1604,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [browser]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -412,7 +1640,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind a D1 database. D1 is Cloudflare’s native serverless SQL database.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -420,7 +1684,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[d1_databases]]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -428,7 +1716,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # database_name = "my-database"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -440,7 +1752,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind a dispatch namespace. Use Workers for Platforms to deploy serverless functions programmatically on behalf of your customers.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -448,11 +1796,47 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[dispatch_namespaces]]
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # binding = "MY_DISPATCHER"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -464,7 +1848,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -472,7 +1892,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#durable-objects
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -480,7 +1924,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # name = "MY_DURABLE_OBJECT"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -492,7 +1960,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Durable Object migrations.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -500,11 +2004,47 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[migrations]]
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # tag = "v1"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -516,7 +2056,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind a Hyperdrive configuration. Use to accelerate access to your existing databases from Cloudflare Workers.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -524,7 +2100,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[hyperdrive]]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -532,7 +2132,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -544,7 +2180,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -552,7 +2212,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # binding = "MY_KV_NAMESPACE"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -564,7 +2248,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind an mTLS certificate. Use to present a client certificate when communicating with another service.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -572,11 +2292,47 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[mtls_certificates]]
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # binding = "MY_CERTIFICATE"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -588,7 +2344,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -596,7 +2388,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[queues.producers]]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -604,7 +2420,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # queue = "my-queue"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -616,11 +2468,47 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#queues
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[queues.consumers]]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -632,7 +2520,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -640,11 +2564,47 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[r2_buckets]]
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # binding = "MY_BUCKET"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -656,7 +2616,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind another Worker service. Use this binding to call another Worker without network overhead.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -664,11 +2660,47 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[services]]
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # binding = "MY_SERVICE"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -680,7 +2712,43 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Bind a Vectorize index. Use to store and query vector embeddings for semantic search, classification and other vector search use-cases.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -688,7 +2756,31 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # [[vectorize]]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -696,101 +2788,407 @@ enabled = true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # index_name = "my-index"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 =======
+
+
+
 # Bind a Vectorize index. Use to store and query vector embeddings for semantic search, classification and other vector search use-cases.
+
+
+
+
+
+
 
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#vectorize-indexes
 
+
+
+
+
+
+
 # [[vectorize]]
 
+
+
+
+
+
+
 # binding = "MY_INDEX"
+
+
+
+
+
+
 
 # index_name = "my-index"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # =============================================================================
+
+
+
+
+
+
 
 # 部署说明和快速开始
 
+
+
+
+
+
+
 # =============================================================================
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 🚀 快速部署步骤：
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 1. 创建数据库：
 
+
+
+
+
+
+
 #    wrangler d1 create gemini-playground-db
+
+
+
+
+
+
 
 #    然后将返回的 database_id 更新到上面的 [[d1_databases]] 配置中
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 2. 初始化数据库：
 
+
+
+
+
+
+
 #    wrangler d1 execute gemini-playground-db --file=database/init.sql
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 3. 设置密钥（选择一种方式）：
 
+
+
+
+
+
+
 #    方式A: npm run setup-secrets（推荐）
+
+
+
+
+
+
 
 #    方式B: 手动设置
 
+
+
+
+
+
+
 #      wrangler secret put SERVER_GEMINI_API_KEY
+
+
+
+
+
+
 
 #      wrangler secret put JWT_SECRET
 
+
+
+
+
+
+
 #      wrangler secret put ENCRYPTION_KEY
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 4. 部署应用：
 
+
+
+
+
+
+
 #    wrangler deploy
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 📚 相关文档：
 
+
+
+
+
+
+
 # - 快速部署指南: QUICK_DEPLOY.md
+
+
+
+
+
+
 
 # - 密钥管理指南: SECRETS_MANAGEMENT.md
 
+
+
+
+
+
+
 # - 完整部署指南: USER_SYSTEM_DEPLOYMENT.md
+
+
+
+
+
+
 
 # - 网络配置指南: NETWORK_CONFIG.md
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 🔧 常用命令：
 
+
+
+
+
+
+
 # - 本地开发: wrangler dev
+
+
+
+
+
+
 
 # - 查看日志: wrangler tail
 
+
+
+
+
+
+
 # - 查看密钥: wrangler secret list
+
+
+
+
+
+
 
 # - 查看数据库: wrangler d1 execute gemini-playground-db --command="SELECT COUNT(*) FROM users"
 
+
+
+
+
+
+
 #
+
+
+
+
+
+
 
 # 🔐 安全提醒：
 
+
+
+
+
+
+
 # - 不要在此文件中存储敏感信息
+
+
+
+
+
+
 
 # - 使用 Cloudflare Secrets 管理密钥
 
+
+
+
+
+
+
 # - 定期轮换密钥
+
+
+
+
+
+
 
 # - 监控访问日志
 
+
+
+
+
+
+
 >>>>>>>
+
+
+
