@@ -1,159 +1,17 @@
-
 {
-
-
-
   "name": "gemini-voice",
-
-
-
   "version": "2.0.0",
-
-
-
   "description": "Gemini 2.5 Playground with user system",
-
-
-
   "main": "src/index.js",
-
-
-
   "private": true,
-
-
-
   "scripts": {
-
-
-
     "deploy": "wrangler deploy",
-
-
-
     "dev": "wrangler dev",
-
-
-
     "start": "wrangler dev"
-
-
-
   },
-
-
-
   "author": "heibais1986",
-
-
-
   "license": "MIT",
-
-
-
   "devDependencies": {
-
-
-
     "wrangler": "^3.60.3"
-
-
-
   }
-
-
-
 }
-
-
-
-
-{
-
-  "name": "gemini-voice",
-
-  "version": "2.0.0",
-
-  "description": "Gemini 2.5 Playground with complete user system and payment integration",
-
-  "main": "src/index.js",
-
-  "private": true,
-
-  "scripts": {
-
-    "deploy": "wrangler deploy",
-
-    "dev": "wrangler dev",
-
-    "start": "wrangler dev",
-
-    "test": "vitest",
-
-    "test:network": "node test/network-test.js",
-
-    "clean-format": "bash scripts/clean-format.sh"
-
-  },
-
-  "keywords": [
-
-    "gemini",
-
-    "ai",
-
-    "chatbot",
-
-    "cloudflare-workers",
-
-    "deno",
-
-    "multimodal",
-
-    "voice",
-
-    "payment",
-
-    "user-system"
-
-  ],
-
-  "author": "heibais1986",
-
-  "license": "MIT",
-
-  "repository": {
-
-    "type": "git",
-
-    "url": "https://github.com/heibais1986/gemini-voice.git"
-
-  },
-
-  "bugs": {
-
-    "url": "https://github.com/heibais1986/gemini-voice/issues"
-
-  },
-
-  "homepage": "https://github.com/heibais1986/gemini-voice#readme",
-
-  "devDependencies": {
-
-    "@cloudflare/vitest-pool-workers": "^0.5.2",
-
-    "wrangler": "^3.60.3",
-
-    "vitest": "^2.1.8"
-
-  },
-
-  "engines": {
-
-    "node": ">=16.0.0"
-
-  }
-
-}
-
->>>>>>>
