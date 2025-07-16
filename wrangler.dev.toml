@@ -1,0 +1,35 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "gemini-voice-dev"
+main = "src/index.js"
+compatibility_date = "2024-12-30"
+compatibility_flags = ["nodejs_compat"]
+
+# 静态资源配置
+assets = { directory = "./src/static" }
+
+# 开发环境变量配置
+[vars]
+# 网络配置 - 使用官方域名进行测试
+GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com"
+GEMINI_API_FALLBACK_URLS = "https://generativelanguage.googleapis.com"
+
+# 用户系统配置 - 测试配置
+WECHAT_APP_ID = "test-wechat-app-id"
+ALIPAY_APP_ID = "test-alipay-app-id"
+WECHAT_PAY_MCH_ID = "test-wechat-pay-mch-id"
+
+# 系统配置
+APP_NAME = "Gemini Playground Dev"
+APP_VERSION = "2.0.0"
+ENVIRONMENT = "development"
+
+# API限制配置
+MAX_DAILY_API_CALLS_FREE = "10"      # 开发环境降低限制
+MAX_DAILY_API_CALLS_PREMIUM = "100"  # 开发环境降低限制
+
+# 支付配置
+PREMIUM_PRICE = "20.00"
+PREMIUM_DURATION_DAYS = "365"
+
+# 开发环境不需要真实的数据库，使用内存模拟
+# 注意：这只是为了测试API代理功能

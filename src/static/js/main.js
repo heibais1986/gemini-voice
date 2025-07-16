@@ -662,6 +662,11 @@ async function handleMicToggle() {
             Logger.info('Microphone started');
             logSystem('Microphone started');
             updateMicIcon();
+            // 显示音频可视化器
+            const audioVisualizersContainer = document.querySelector('.audio-visualizers');
+            if (audioVisualizersContainer) {
+                audioVisualizersContainer.style.display = 'block';
+            }
         } catch (error) {
             Logger.error('Microphone error:', error);
             logSystem(`Microphone error: ${error.message}`);
@@ -676,6 +681,11 @@ async function handleMicToggle() {
         logSystem('Microphone stopped');
         updateMicIcon();
         updateAudioVisualizer(0, true);
+        // 隐藏音频可视化器
+        const audioVisualizersContainer = document.querySelector('.audio-visualizers');
+        if (audioVisualizersContainer) {
+            audioVisualizersContainer.style.display = 'none';
+        }
     }
 }
 /**
@@ -721,8 +731,8 @@ async function connectToWebsocket() {
             responseModalities: responseTypeSelect.value,
             speechConfig: {
                 languageCode: languageSelect.value,
-                voiceConfig: { 
-                    prebuiltVoiceConfig: { 
+                voiceConfig: {
+                    prebuiltVoiceConfig: {
                         voiceName: voiceSelect.value
                     }
                 }
@@ -733,7 +743,7 @@ async function connectToWebsocket() {
                 text: systemInstructionWithTime
             }],
         }
-    };  
+    };
     try {
         await client.connect(config,apiKeyInput.value);
         isConnected = true;
@@ -914,6 +924,11 @@ async function handleVideoToggle() {
             cameraButton.classList.add('active');
             Logger.info('Camera started successfully');
             logSystem('Camera started');
+            // 显示视频容器
+            const videoContainer = document.getElementById('video-container');
+            if (videoContainer) {
+                videoContainer.style.display = 'block';
+            }
         } catch (error) {
             Logger.error('Camera error:', error);
             logSystem(`Camera error: ${error.message}`);
@@ -940,6 +955,11 @@ function stopVideo() {
     cameraIcon.textContent = 'videocam';
     cameraButton.classList.remove('active');
     logMessage('Camera stopped', 'system');
+    // 隐藏视频容器
+    const videoContainer = document.getElementById('video-container');
+    if (videoContainer) {
+        videoContainer.style.display = 'none';
+    }
 }
 cameraButton.addEventListener('click', handleVideoToggle);
 stopVideoButton.addEventListener('click', stopVideo);
@@ -1182,4 +1202,3 @@ connectButton.addEventListener('click', () => {
         connectToWebsocketWithAuth();
     }
 });
- 

@@ -88,31 +88,33 @@
                 </button>
             </div>
         </div>
-        <!-- 隐藏的技术组件 -->
-        <div style="display: none;">
-            <div class="audio-visualizers">
-                <div class="visualizer-container">
-                    <label>输入音频</label>
-                    <div id="input-audio-visualizer"></div>
-                </div>
-                <div class="visualizer-container">
-                    <label>输出音频</label>
-                    <div id="audio-visualizer"></div>
-                </div>
+        <!-- 音频可视化器 -->
+        <div class="audio-visualizers" style="display: none;">
+            <div class="visualizer-container">
+                <label>输入音频</label>
+                <div id="input-audio-visualizer"></div>
             </div>
-            <div id="video-container">
-                <video id="preview" playsinline autoplay muted></video>
-                <div class="video-controls">
-                    <button id="stop-video">停止视频</button>
-                    <button id="flip-camera">
-                        <span class="material-symbols-outlined">flip_camera_ios</span>
-                    </button>
-                </div>
+            <div class="visualizer-container">
+                <label>输出音频</label>
+                <div id="audio-visualizer"></div>
             </div>
-            <div id="screen-container">
-                <video id="screen-preview" playsinline autoplay muted></video>
-                <button class="close-button material-symbols-outlined">close</button>
+        </div>
+
+        <!-- 视频预览容器 -->
+        <div id="video-container" style="display: none;">
+            <video id="preview" playsinline autoplay muted></video>
+            <div class="video-controls">
+                <button id="stop-video">停止视频</button>
+                <button id="flip-camera">
+                    <span class="material-symbols-outlined">flip_camera_ios</span>
+                </button>
             </div>
+        </div>
+
+        <!-- 屏幕共享容器 -->
+        <div id="screen-container" style="display: none;">
+            <video id="screen-preview" playsinline autoplay muted></video>
+            <button class="close-button material-symbols-outlined">close</button>
         </div>
     </div>
     <script type="module" src="js/main.js"></script>

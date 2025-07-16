@@ -255,11 +255,121 @@ body {
         transform: translateY(0);
     }
 }
-/* 隐藏技术细节 */
-.audio-visualizers,
-#video-container,
+/* 音频可视化器样式 */
+.audio-visualizers {
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.visualizer-container {
+    margin-bottom: var(--spacing-sm);
+}
+
+.visualizer-container label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+#input-audio-visualizer,
+#audio-visualizer {
+    height: 20px;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.audio-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A, #CDDC39);
+    border-radius: var(--border-radius);
+    transition: width 0.1s ease;
+    min-width: 2px;
+}
+
+/* 视频容器样式 */
+#video-container {
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+#video-container video {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    background: #000;
+}
+
+.video-controls {
+    margin-top: var(--spacing-sm);
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+.video-controls button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.video-controls button:hover {
+    background: var(--accent-hover);
+}
+
+/* 屏幕共享容器样式 */
 #screen-container {
-    display: none !important;
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    position: relative;
+}
+
+#screen-container video {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    background: #000;
+}
+
+.close-button {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.close-button:hover {
+    background: rgba(0, 0, 0, 0.9);
 }
 /* 响应式设计 */
 @media (max-width: 768px) {
