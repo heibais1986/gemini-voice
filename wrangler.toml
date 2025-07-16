@@ -3,30 +3,16 @@ name = "gemini-voice"
 main = "src/index.js"
 compatibility_date = "2024-12-30"
 compatibility_flags = ["nodejs_compat"]
-#:schema node_modules/wrangler/config-schema.json
+
 # 静态资源配置
-# 将 src/static 目录下的文件作为静态资源提供服务
 assets = { directory = "./src/static" }
-# 监控和日志配置
-# Workers Logs - 启用日志记录，便于调试和监控
-# 文档: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
-# 智能放置配置（可选）
-# 自动将工作负载放置在最佳位置以最小化延迟
-# 对于后端逻辑，放置在靠近后端基础设施而非最终用户的位置可能会有更好的性能
-# 文档: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-# [placement]
-# mode = "smart"
+
 # 环境变量配置
-# 变量绑定：这些是任意的纯文本字符串（类似于环境变量）
 # 文档: https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 # 注意：敏感数据请使用 Secrets 存储
-# 文档: https://developers.cloudflare.com/workers/configuration/secrets/
 [vars]
-# 网络配置 - 解决中国大陆访问限制问题
-# 可配置的Gemini API基础URL，默认使用官方域名
-# 如果无法访问可以设置为代理域名
+# 网络配置
 GEMINI_API_BASE_URL = "https://ga.docman.edu.kg"
-compatibility_flags = ["nodejs_compat"]
 # 备用域名列表，当主域名无法访问时自动尝试
 # 多个域名用逗号分隔，支持故障转移
 GEMINI_API_FALLBACK_URLS = "https://backup1.docman.edu.kg,https://backup2.docman.edu.kg,https://generativelanguage.googleapis.com"
@@ -63,121 +49,18 @@ PREMIUM_DURATION_DAYS = "365"         # 年费有效期（天）
 # 2. 手动设置：wrangler secret put <SECRET_NAME>
 # 3. 查看已设置的密钥：wrangler secret list
 # 详细说明请参考：SECRETS_MANAGEMENT.md
-# Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#workers-ai
-# [ai]
-# binding = "AI"
-# Workers Logs
-# Bind a D1 database. D1 is Cloudflare’s native serverless SQL database.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases
+
+# 绑定 D1 数据库
+# 文档: https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases
 [[d1_databases]]
 binding = "DB"                                    # 在代码中通过 env.DB 访问
 database_name = "gemini-playground-db"            # 数据库名称
 database_id = "86caa569-e298-4c04-8c4e-db6f4620339e"            # ⚠️ 需要创建数据库后替换为实际ID
-# Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
-# 数据库操作命令：
-# 创建数据库：wrangler d1 create gemini-voice-db
-# 初始化数据库：wrangler d1 execute gemini-voice-db --file=database/init.sql
-# 查看数据库：wrangler d1 execute gemini-voice-db --command="SELECT COUNT(*) FROM users"
-# Bind a dispatch namespace. Use Workers for Platforms to deploy serverless functions programmatically on behalf of your customers.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#dispatch-namespace-bindings-workers-for-platforms
-# [[dispatch_namespaces]]
-# binding = "MY_DISPATCHER"
-# namespace = "my-namespace"
-# Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
+
+# 启用日志记录
+# 文档: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
 [observability]
 enabled = true
-# Automatically place your workloads in an optimal location to minimize latency.
-# If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
-# rather than the end user may result in better performance.
-# Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-# [placement]
-# mode = "smart"
-# Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
-# Docs:
-# - https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-# Note: Use secrets to store sensitive data.
-# - https://developers.cloudflare.com/workers/configuration/secrets/
-# [vars]
-# MY_VARIABLE = "production_value"
-# Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
-# docs: https://developers.cloudflare.com/workers/wrangler/configuration/#workers-ai
-# [ai]
-# binding = "AI"
-# Bind an Analytics Engine dataset. Use Analytics Engine to write analytics within your Pages Function.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#analytics-engine-datasets
-# [[analytics_engine_datasets]]
-# binding = "MY_DATASET"
-# Bind a headless browser instance running on Cloudflare's global network.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#browser-rendering
-# [browser]
-# binding = "MY_BROWSER"
-# Bind a D1 database. D1 is Cloudflare’s native serverless SQL database.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases
-# [[d1_databases]]
-# binding = "MY_DB"
-# database_name = "my-database"
-# database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-# Bind a dispatch namespace. Use Workers for Platforms to deploy serverless functions programmatically on behalf of your customers.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#dispatch-namespace-bindings-workers-for-platforms
-# [[dispatch_namespaces]]
-# binding = "MY_DISPATCHER"
-# namespace = "my-namespace"
-# Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.
-# Durable Objects can live for as long as needed. Use these when you need a long-running "server", such as in realtime apps.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#durable-objects
-# [[durable_objects.bindings]]
-# name = "MY_DURABLE_OBJECT"
-# class_name = "MyDurableObject"
-# Durable Object migrations.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#migrations
-# [[migrations]]
-# tag = "v1"
-# new_classes = ["MyDurableObject"]
-# Bind a Hyperdrive configuration. Use to accelerate access to your existing databases from Cloudflare Workers.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#hyperdrive
-# [[hyperdrive]]
-# binding = "MY_HYPERDRIVE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# Bind an mTLS certificate. Use to present a client certificate when communicating with another service.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#mtls-certificates
-# [[mtls_certificates]]
-# binding = "MY_CERTIFICATE"
-# certificate_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-# Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#queues
-# [[queues.producers]]
-# binding = "MY_QUEUE"
-# queue = "my-queue"
-# Bind a Queue consumer. Queue Consumers can retrieve tasks scheduled by Producers to act on them.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#queues
-# [[queues.consumers]]
-# queue = "my-queue"
-# Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#r2-buckets
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
-# Bind another Worker service. Use this binding to call another Worker without network overhead.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-# [[services]]
-# binding = "MY_SERVICE"
-# service = "my-service"
-# Bind a Vectorize index. Use to store and query vector embeddings for semantic search, classification and other vector search use-cases.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#vectorize-indexes
-# [[vectorize]]
-# binding = "MY_INDEX"
-# index_name = "my-index"
-# Bind a Vectorize index. Use to store and query vector embeddings for semantic search, classification and other vector search use-cases.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#vectorize-indexes
-# [[vectorize]]
-# binding = "MY_INDEX"
-# index_name = "my-index"
 #
 # 部署说明和快速开始
 #

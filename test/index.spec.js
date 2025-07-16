@@ -15,4 +15,4 @@ describe('Hello World worker', () => {
 		const response = await SELF.fetch(request, env, ctx);
 		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
 	});
-});
+})
