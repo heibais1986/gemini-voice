@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS system_config;
 
 -- 注意：表的创建语句已移至 schema.sql 文件。
 -- 这里只负责插入初始数据。
->>>>>>> Stashed changes
+ Stashed changes
 -- 插入默认系统配置
 INSERT INTO system_config (config_key, config_value, description) VALUES
 ('premium_price', '20.00', '年费价格（元）'),
@@ -39,4 +39,4 @@ INSERT INTO system_config (config_key, config_value, description) VALUES
 SELECT 'Database initialization completed successfully!' as message;
 SELECT 'System config entries:' as info;
 SELECT config_key, config_value, description FROM system_config;
->>>>>>> Stashed changes
+ Stashed changes
