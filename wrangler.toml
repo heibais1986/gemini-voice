@@ -32,7 +32,7 @@ compatibility_flags = ["nodejs_compat"]
 
 
 
-name = "gemini-playground"
+name = "gemini-voice"
 
 
 
@@ -108,11 +108,11 @@ assets = { directory = "./src/static" }
 
 
 
-<<<<<<<
 
 
 
-name = "gemini-playground"
+
+name = "gemini-voice"
 
 
 
@@ -192,7 +192,7 @@ enabled = true
 
 
 
-<<<<<<<
+
 
 
 
@@ -284,7 +284,7 @@ main = "src/index.js"
 
 
 
-<<<<<<<
+
 
 
 
@@ -424,7 +424,7 @@ GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com"
 
 
 
-<<<<<<<
+
 
 
 
@@ -932,7 +932,7 @@ assets = { directory = "./src/static" }
 
 
 
-<<<<<<<
+
 
 
 
@@ -980,7 +980,7 @@ binding = "DB"                                    # 在代码中通过 env.DB �
 
 
 
-database_name = "gemini-playground-db"            # 数据库名称
+database_name = "gemini-voice-db"            # 数据库名称
 
 
 
@@ -1008,7 +1008,7 @@ database_id = "your-database-id-here"            # ⚠️ 需要创建数据库�
 
 
 
-<<<<<<<
+
 
 
 
@@ -1032,7 +1032,7 @@ database_id = "your-database-id-here"            # ⚠️ 需要创建数据库�
 
 
 
-# 创建数据库：wrangler d1 create gemini-playground-db
+# 创建数据库：wrangler d1 create gemini-voice-db
 
 
 
@@ -1040,7 +1040,7 @@ database_id = "your-database-id-here"            # ⚠️ 需要创建数据库�
 
 
 
-# 初始化数据库：wrangler d1 execute gemini-playground-db --file=database/init.sql
+# 初始化数据库：wrangler d1 execute gemini-voice-db --file=database/init.sql
 
 
 
@@ -1048,7 +1048,7 @@ database_id = "your-database-id-here"            # ⚠️ 需要创建数据库�
 
 
 
-# 查看数据库：wrangler d1 execute gemini-playground-db --command="SELECT COUNT(*) FROM users"
+# 查看数据库：wrangler d1 execute gemini-voice-db --command="SELECT COUNT(*) FROM users"
 
 
 
@@ -1260,7 +1260,7 @@ enabled = true
 
 
 
-<<<<<<<
+
 
 
 
@@ -2924,7 +2924,7 @@ enabled = true
 
 
 
-#    wrangler d1 create gemini-playground-db
+#    wrangler d1 create gemini-voice-db
 
 
 
@@ -2956,7 +2956,7 @@ enabled = true
 
 
 
-#    wrangler d1 execute gemini-playground-db --file=database/init.sql
+#    wrangler d1 execute gemini-voice-db --file=database/init.sql
 
 
 
@@ -3132,7 +3132,7 @@ enabled = true
 
 
 
-# - 查看数据库: wrangler d1 execute gemini-playground-db --command="SELECT COUNT(*) FROM users"
+# - 查看数据库: wrangler d1 execute gemini-voice-db --command="SELECT COUNT(*) FROM users"
 
 
 
