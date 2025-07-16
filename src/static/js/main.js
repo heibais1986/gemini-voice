@@ -47,39 +47,47 @@ class UserAuthManager {
     }
 
     async checkAuth() {
-        if (!this.sessionToken) {
-            this.redirectToLogin();
+        // 如果后端已经重定向到登录页，说明认证失败，不需要前端再次检查
+        if (window.location.pathname === '/login.html') {
             return false;
         }
-        try {
-            const response = await fetch('/api/user/profile', {
-                headers: {
-                    'Authorization': `Bearer ${this.sessionToken}`
+
+        // 如果有sessionToken，尝试获取用户信息
+        if (this.sessionToken) {
+            try {
+                const response = await fetch('/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${this.sessionToken}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    this.currentUser = data.user;
+                    this.isAuthenticated = true;
+                    this.updateUserUI();
+                    this.hideLoginOverlay();
+                    return true;
+                } else {
+                    // token无效，清除并显示登录提示
+                    this.clearSessionToken();
+                    this.showLoginOverlay();
+                    return false;
                 }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                this.currentUser = data.user;
-                this.isAuthenticated = true;
-                this.updateUserUI();
-                return true;
-            } else {
-                this.clearSessionToken();
-                this.redirectToLogin();
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                this.showLoginOverlay();
                 return false;
             }
-        } catch (error) {
-            console.error('Auth check failed:', error);
-            this.clearSessionToken();
-            this.redirectToLogin();
+        } else {
+            // 没有token，显示登录提示
+            this.showLoginOverlay();
             return false;
         }
     }
 
     redirectToLogin() {
-        if (window.location.pathname !== '/login.html') {
-            window.location.href = '/login.html';
-        }
+        // 优先显示登录遮罩，而不是直接重定向
+        this.showLoginOverlay();
     }
 
     showLoginOverlay() {
@@ -784,9 +792,15 @@ screenContainer.querySelector('.close-button').addEventListener('click', () => {
 });
 
 // 初始化
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 检查服务器是否要求认证
+    const authRequired = document.querySelector('meta[name="auth-required"]');
+    if (authRequired && authRequired.content === 'true') {
+        userAuth.showLoginOverlay();
+    }
+
     // 检查用户认证状态
-    userAuth.checkAuth();
+    await userAuth.checkAuth();
 
     // 初始状态设置
     micButton.disabled = true;

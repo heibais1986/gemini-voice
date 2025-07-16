@@ -51,9 +51,7 @@ async function handlePageRouting(request, env) {
     switch (pathname) {
       case '/':
       case '/index.html':
-        return authResult.isAuthenticated
-          ? await serveStaticFile('index.html')
-          : Response.redirect(new URL('/login.html', request.url).toString(), 302);
+        return await serveIndexPage(authResult.isAuthenticated);
 
       case '/login.html':
         return authResult.isAuthenticated
@@ -133,6 +131,36 @@ async function handleLogoutPage(request, env) {
   } catch (error) {
     console.error('Logout error:', error);
     return Response.redirect(new URL('/login.html', request.url).toString(), 302);
+  }
+}
+
+/**
+ * 提供主页服务，根据认证状态动态修改内容
+ */
+async function serveIndexPage(isAuthenticated) {
+  try {
+    let fileContent = getStaticFileContent('index.html');
+    if (fileContent === null) {
+      return new Response('File not found', { status: 404 });
+    }
+
+    // 如果用户未认证，在HTML中添加meta标签
+    if (!isAuthenticated) {
+      fileContent = fileContent.replace(
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <meta name="auth-required" content="true">'
+      );
+    }
+
+    return new Response(fileContent, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache'
+      }
+    });
+  } catch (error) {
+    console.error('Serve index page error:', error);
+    return new Response('Internal Server Error', { status: 500 });
   }
 }
 
