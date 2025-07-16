@@ -2,93 +2,385 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 //Project: https://github.com/PublicAffairs/openai-gemini
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 //MIT License : https://github.com/PublicAffairs/openai-gemini/blob/main/LICENSE
 
+
+
+
+
+
+
 =======
+
+
+
 export default {
+
+
+
+
+
+
 
   async fetch (request, env) {
 
+
+
+
+
+
+
     if (request.method === "OPTIONS") {
+
+
+
+
+
+
 
       return handleOPTIONS();
 
+
+
+
+
+
+
     }
+
+
+
+
+
+
 
     const errHandler = (err) => {
 
+
+
+
+
+
+
       console.error(err);
+
+
+
+
+
+
 
       return new Response(err.message, fixCors({ status: err.status ?? 500 }));
 
+
+
+
+
+
+
     };
+
+
+
+
+
+
 
     try {
 
+
+
+<<<<<<<
+
+
+
+
       const auth = request.headers.get("Authorization");
+
+
+
+
+
+
 
       const apiKey = auth?.split(" ")[1];
 
+
+
+
+
+
+
       const assert = (success) => {
+
+
+
+
+
+
 
         if (!success) {
 
+
+
+
+
+
+
           throw new HttpError("The specified HTTP method is not allowed for the requested resource", 400);
+
+
+
+
+
+
 
         }
 
+
+
+
+
+
+
       };
+
+
+
+
+
+
 
       const { pathname } = new URL(request.url);
 
+
+
+
+
+
+
       switch (true) {
+
+
+
+
+
+
 
         case pathname.endsWith("/chat/completions"):
 
+
+
+
+
+
+
           assert(request.method === "POST");
+
+
+
+
+
+
 
           return handleCompletions(await request.json(), apiKey, env)
 
+
+
+
+
+
+
             .catch(errHandler);
+
+
+
+
+
+
 
         case pathname.endsWith("/embeddings"):
 
+
+
+
+
+
+
           assert(request.method === "POST");
+
+
+
+
+
+
 
           return handleEmbeddings(await request.json(), apiKey, env)
 
+
+
+
+
+
+
             .catch(errHandler);
+
+
+
+
+
+
 
         case pathname.endsWith("/models"):
 
+
+
+
+
+
+
           assert(request.method === "GET");
+
+
+
+
+
+
 
           return handleModels(apiKey, env)
 
+
+
+
+
+
+
             .catch(errHandler);
+
+
+
+
+
+
 
         default:
 
+
+
+
+
+
+
           throw new HttpError("404 Not Found", 404);
+
+
+
+
+
+
 
       }
 
+
+
+
+
+
+
     } catch (err) {
+
+
+
+
+
+
 
       return errHandler(err);
 
+
+
+
+
+
+
     }
+
+
+
+
+
+
 
   }
 
+
+
+
+
+
+
 };
 
+
+
+
+
+
+
 >>>>>>>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -103,340 +395,1375 @@ import { Buffer } from "node:buffer";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
 export default {
 
+
+
+
+
+
+
 =======
+
+
+
 // 支持可配置的基础URL，解决中国大陆访问限制问题
+
+
+
+
+
+
 
 const getBaseUrl = (env) => {
 
+
+
+
+
+
+
   // 优先使用环境变量配置的URL
+
+
+
+
+
+
 
   if (env && env.GEMINI_API_BASE_URL) {
 
+
+
+
+
+
+
     return env.GEMINI_API_BASE_URL;
+
+
+
+
+
+
 
   }
 
+
+
+
+
+
+
   // 默认使用官方域名
+
+
+
+
+
+
 
   return "https://generativelanguage.googleapis.com";
 
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 // 获取备用URL列表
 
+
+
+
+
+
+
 const getFallbackUrls = (env) => {
+
+
+
+
+
+
 
   if (env && env.GEMINI_API_FALLBACK_URLS) {
 
+
+
+
+
+
+
     return env.GEMINI_API_FALLBACK_URLS.split(',').map(url => url.trim());
+
+
+
+
+
+
 
   }
 
+
+
+
+
+
+
   return ["https://generativelanguage.googleapis.com"];
 
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 const API_VERSION = "v1beta";
 
+
+
+
+
+
+
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
   async fetch (request) {
 
+
+
+
+
+
+
 =======
+
+
+
 // 带有重试机制的fetch函数，支持多个备用URL
+
+
+
+
+
+
 
 const fetchWithFallback = async (path, options, env) => {
 
+
+
+
+
+
+
   const baseUrl = getBaseUrl(env);
+
+
+
+
+
+
 
   const fallbackUrls = getFallbackUrls(env);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   // 首先尝试主URL
 
+
+
+
+
+
+
   const primaryUrl = `${baseUrl}${path}`;
+
+
+
+
+
+
 
   console.log(`Trying primary URL: ${primaryUrl}`);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   try {
+
+
+
+
+
+
 
     const response = await fetch(primaryUrl, options);
 
+
+
+
+
+
+
     if (response.ok || response.status < 500) {
+
+
+
+
+
+
 
       return response;
 
+
+
+
+
+
+
     }
+
+
+
+
+
+
 
     console.log(`Primary URL failed with status: ${response.status}`);
 
+
+
+
+
+
+
   } catch (error) {
+
+
+
+
+
+
 
     console.log(`Primary URL failed with error: ${error.message}`);
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
   // 如果主URL失败，尝试备用URL
 
+
+
+
+
+
+
   for (const fallbackUrl of fallbackUrls) {
+
+
+
+
+
+
 
     if (fallbackUrl === baseUrl) continue; // 跳过已经尝试过的主URL
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const url = `${fallbackUrl}${path}`;
+
+
+
+
+
+
 
     console.log(`Trying fallback URL: ${url}`);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
 
       const response = await fetch(url, options);
 
+
+
+
+
+
+
       if (response.ok || response.status < 500) {
+
+
+
+
+
+
 
         console.log(`Fallback URL succeeded: ${url}`);
 
+
+
+
+
+
+
         return response;
+
+
+
+
+
+
 
       }
 
+
+
+
+
+
+
       console.log(`Fallback URL failed with status: ${response.status}`);
+
+
+
+
+
+
 
     } catch (error) {
 
+
+
+
+
+
+
       console.log(`Fallback URL failed with error: ${error.message}`);
+
+
+
+
+
+
 
     }
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
   // 所有URL都失败，抛出错误
 
+
+
+
+
+
+
   throw new HttpError("All API endpoints failed. Please check your network connection or try using a proxy.", 503);
+
+
+
+
+
+
 
 };
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 // https://github.com/google-gemini/generative-ai-js/blob/cf223ff4a1ee5a2d944c53cddb8976136382bee6/src/requests/request.ts#L71
+
+
+
+
+
+
 
 const API_CLIENT = "genai-js/0.21.0"; // npm view @google/generative-ai version
 
+
+
+
+
+
+
 const makeHeaders = (apiKey, more) => ({
+
+
+
+
+
+
 
   "x-goog-api-client": API_CLIENT,
 
+
+
+
+
+
+
   ...(apiKey && { "x-goog-api-key": apiKey }),
+
+
+
+
+
+
 
   ...more
 
+
+
+
+
+
+
 });
+
+
+
+
+
+
 
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
     if (request.method === "OPTIONS") {
 
+
+
+
+
+
+
 =======
+
+
+
 async function handleModels (apiKey, env) {
+
+
+
+
+
+
 
   const response = await fetchWithFallback(`/${API_VERSION}/models`, {
 
+
+
+
+
+
+
     headers: makeHeaders(apiKey),
+
+
+
+
+
+
 
   }, env);
 
+
+
+
+
+
+
   let { body } = response;
 
+
+
+
+
+
+
   if (response.ok) {
+
+
+
+
+
+
 
     const { models } = JSON.parse(await response.text());
 
+
+
+
+
+
+
     body = JSON.stringify({
 
+
+
+
+
+
+
       object: "list",
+
+
+
+
+
+
 
       data: models.map(({ name }) => ({
 
+
+
+
+
+
+
         id: name.replace("models/", ""),
+
+
+
+
+
+
 
         object: "model",
 
+
+
+
+
+
+
         created: 0,
+
+
+
+
+
+
 
         owned_by: "",
 
+
+
+
+
+
+
       })),
+
+
+
+
+
+
 
     }, null, "  ");
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
 
   return new Response(body, fixCors(response));
 
+
+
+
+
+
+
 }
+
+
+
+
+
+
 
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
 <<<<<<<
+
+
+
       return handleOPTIONS();
 
+
+
+
+
+
+
 =======
+
+
+
 const DEFAULT_EMBEDDINGS_MODEL = "text-embedding-004";
+
+
+
+
+
+
 
 async function handleEmbeddings (req, apiKey, env) {
 
+
+
+
+
+
+
   if (typeof req.model !== "string") {
+
+
+
+
+
+
 
     throw new HttpError("model is not specified", 400);
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
 
   if (!Array.isArray(req.input)) {
 
+
+
+
+
+
+
     req.input = [ req.input ];
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
 
   let model;
 
+
+
+
+
+
+
   if (req.model.startsWith("models/")) {
+
+
+
+
+
+
 
     model = req.model;
 
+
+
+
+
+
+
   } else {
+
+
+
+
+
+
 
     req.model = DEFAULT_EMBEDDINGS_MODEL;
 
+
+
+
+
+
+
     model = "models/" + req.model;
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
 
   const response = await fetchWithFallback(`/${API_VERSION}/${model}:batchEmbedContents`, {
 
+
+
+
+
+
+
     method: "POST",
 
+
+
+
+
+
+
     headers: makeHeaders(apiKey, { "Content-Type": "application/json" }),
+
+
+
+
+
+
 
     body: JSON.stringify({
 
+
+
+
+
+
+
       "requests": req.input.map(text => ({
+
+
+
+
+
+
 
         model,
 
+
+
+
+
+
+
         content: { parts: { text } },
+
+
+
+
+
+
 
         outputDimensionality: req.dimensions,
 
+
+
+
+
+
+
       }))
+
+
+
+
+
+
 
     })
 
+
+
+
+
+
+
   }, env);
+
+
+
+
+
+
 
   let { body } = response;
 
+
+
+
+
+
+
   if (response.ok) {
+
+
+
+
+
+
 
     const { embeddings } = JSON.parse(await response.text());
 
+
+
+
+
+
+
     body = JSON.stringify({
+
+
+
+
+
+
 
       object: "list",
 
+
+
+
+
+
+
       data: embeddings.map(({ values }, index) => ({
+
+
+
+
+
+
 
         object: "embedding",
 
+
+
+
+
+
+
         index,
+
+
+
+
+
+
 
         embedding: values,
 
+
+
+
+
+
+
       })),
+
+
+
+
+
+
 
       model: req.model,
 
+
+
+
+
+
+
     }, null, "  ");
 
+
+
+
+
+
+
   }
+
+
+
+
+
+
 
   return new Response(body, fixCors(response));
 
+
+
+
+
+
+
 }
 
+
+
+
+
+
+
 >>>>>>>
+
+
+
+
+
+
+
+
+
 
 
 <<<<<<<
+
+
+
     }
 
+
+
+
+
+
+
 =======
+
+
+
 const DEFAULT_MODEL = "gemini-1.5-pro-latest";
+
+
+
+
+
+
 
 async function handleCompletions (req, apiKey, env) {
 
+
+
+
+
+
+
   let model = DEFAULT_MODEL;
+
+
+
+
+
+
 
   switch(true) {
 
+
+
+
+
+
+
     case typeof req.model !== "string":
 
+
+
+
+
+
+
       break;
+
+
+
+
+
+
 
     case req.model.startsWith("models/"):
 
+
+
+
+
+
+
       model = req.model.substring(7);
+
+
+
+
+
+
 
       break;
 
+
+
+
+
+
+
     case req.model.startsWith("gemini-"):
+
+
+
+
+
+
 
     case req.model.startsWith("learnlm-"):
 
+
+
+
+
+
+
       model = req.model;
+
+
+
+
+
+
 
   }
 
+
+
+
+
+
+
   const TASK = req.stream ? "streamGenerateContent" : "generateContent";
+
+
+
+
+
+
 
   let path = `/${API_VERSION}/models/${model}:${TASK}`;
 
+
+
+
+
+
+
   if (req.stream) { path += "?alt=sse"; }
+
+
+
+
+
+
 
   const response = await fetchWithFallback(path, {
 
+
+
+
+
+
+
     method: "POST",
+
+
+
+
+
+
 
     headers: makeHeaders(apiKey, { "Content-Type": "application/json" }),
 
+
+
+
+
+
+
     body: JSON.stringify(await transformRequest(req)), // try
 
+
+
+
+
+
+
   }, env);
+
+
+
+
+
+
 
 >>>>>>>
 
 
+
+
+
+
+
+
+
+
+
     const errHandler = (err) => {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -444,7 +1771,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       return new Response(err.message, fixCors({ status: err.status ?? 500 }));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -452,7 +1803,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -460,7 +1835,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       const apiKey = auth?.split(" ")[1];
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -468,7 +1867,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         if (!success) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -476,7 +1899,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -484,7 +1931,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       const { pathname } = new URL(request.url);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -492,11 +1963,47 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         case pathname.endsWith("/chat/completions"):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           assert(request.method === "POST");
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -504,7 +2011,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             .catch(errHandler);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -512,7 +2043,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           assert(request.method === "POST");
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -520,7 +2075,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             .catch(errHandler);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -528,7 +2107,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           assert(request.method === "GET");
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -536,7 +2139,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             .catch(errHandler);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -544,7 +2171,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           throw new HttpError("404 Not Found", 404);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -552,7 +2203,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     } catch (err) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -560,7 +2235,31 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -568,7 +2267,43 @@ async function handleCompletions (req, apiKey, env) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -580,7 +2315,31 @@ class HttpError extends Error {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   constructor(message, status) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -588,7 +2347,31 @@ class HttpError extends Error {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     this.name = this.constructor.name;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -596,11 +2379,59 @@ class HttpError extends Error {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -612,7 +2443,31 @@ const fixCors = ({ headers, status, statusText }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   headers = new Headers(headers);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -620,11 +2475,59 @@ const fixCors = ({ headers, status, statusText }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   return { headers, status, statusText };
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -636,7 +2539,31 @@ const handleOPTIONS = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   return new Response(null, {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -644,7 +2571,31 @@ const handleOPTIONS = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       "Access-Control-Allow-Origin": "*",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -652,7 +2603,31 @@ const handleOPTIONS = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       "Access-Control-Allow-Headers": "*",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -660,11 +2635,59 @@ const handleOPTIONS = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   });
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -676,7 +2699,43 @@ const BASE_URL = "https://generativelanguage.googleapis.com";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const API_VERSION = "v1beta";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -688,7 +2747,31 @@ const API_VERSION = "v1beta";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const API_CLIENT = "genai-js/0.21.0"; // npm view @google/generative-ai version
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -696,7 +2779,31 @@ const makeHeaders = (apiKey, more) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   "x-goog-api-client": API_CLIENT,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -704,11 +2811,59 @@ const makeHeaders = (apiKey, more) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   ...more
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -720,7 +2875,31 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const response = await fetch(`${BASE_URL}/${API_VERSION}/models`, {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -728,7 +2907,31 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -736,7 +2939,31 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (response.ok) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -744,7 +2971,31 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     body = JSON.stringify({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -752,7 +3003,31 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       data: models.map(({ name }) => ({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -760,7 +3035,31 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         object: "model",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -768,7 +3067,31 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         owned_by: "",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -776,7 +3099,31 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     }, null, "  ");
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -784,11 +3131,59 @@ async function handleModels (apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   return new Response(body, fixCors(response));
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -800,7 +3195,31 @@ const DEFAULT_EMBEDDINGS_MODEL = "text-embedding-004";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 async function handleEmbeddings (req, apiKey) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -808,11 +3227,47 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     throw new HttpError("model is not specified", 400);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -820,11 +3275,47 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     req.input = [ req.input ];
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -832,7 +3323,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (req.model.startsWith("models/")) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -840,7 +3355,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   } else {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -848,11 +3387,47 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     model = "models/" + req.model;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -860,7 +3435,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     method: "POST",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -868,7 +3467,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     body: JSON.stringify({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -876,7 +3499,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         model,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -884,7 +3531,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         outputDimensionality: req.dimensions,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -892,7 +3563,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     })
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -900,7 +3595,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   let { body } = response;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -908,7 +3627,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const { embeddings } = JSON.parse(await response.text());
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -916,7 +3659,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       object: "list",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -924,7 +3691,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         object: "embedding",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -932,7 +3723,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         embedding: values,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -940,7 +3755,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       model: req.model,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -948,7 +3787,31 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -956,7 +3819,43 @@ async function handleEmbeddings (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -968,7 +3867,31 @@ const DEFAULT_MODEL = "gemini-1.5-pro-latest";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 async function handleCompletions (req, apiKey) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -976,7 +3899,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   switch(true) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -984,7 +3931,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       break;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -992,7 +3963,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       model = req.model.substring(7);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1000,7 +3995,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     case req.model.startsWith("gemini-"):
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1008,7 +4027,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       model = req.model;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1016,7 +4059,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const TASK = req.stream ? "streamGenerateContent" : "generateContent";
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1024,7 +4091,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (req.stream) { url += "?alt=sse"; }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1032,7 +4123,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     method: "POST",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1040,11 +4155,59 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     body: JSON.stringify(await transformRequest(req)), // try
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1056,7 +4219,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (response.ok) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1064,7 +4251,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     if (req.stream) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1072,11 +4283,47 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         .pipeThrough(new TextDecoderStream())
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         .pipeThrough(new TransformStream({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1084,7 +4331,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           flush: parseStreamFlush,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1092,7 +4363,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         }))
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1100,7 +4395,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           transform: toOpenAiStream,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1108,7 +4427,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           streamIncludeUsage: req.stream_options?.include_usage,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1116,7 +4459,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         }))
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1124,7 +4491,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     } else {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1132,7 +4523,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       body = processCompletionsResponse(JSON.parse(body), model, id);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1140,7 +4555,31 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1148,7 +4587,43 @@ async function handleCompletions (req, apiKey) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1160,7 +4635,31 @@ const harmCategory = [
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   "HARM_CATEGORY_HATE_SPEECH",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1168,7 +4667,31 @@ const harmCategory = [
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   "HARM_CATEGORY_DANGEROUS_CONTENT",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1176,7 +4699,31 @@ const harmCategory = [
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   "HARM_CATEGORY_CIVIC_INTEGRITY",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1184,7 +4731,31 @@ const harmCategory = [
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const safetySettings = harmCategory.map(category => ({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1192,7 +4763,31 @@ const safetySettings = harmCategory.map(category => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   threshold: "BLOCK_NONE",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1200,7 +4795,31 @@ const safetySettings = harmCategory.map(category => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const fieldsMap = {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1208,7 +4827,31 @@ const fieldsMap = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   n: "candidateCount", // not for streaming
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1216,7 +4859,31 @@ const fieldsMap = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   max_completion_tokens: "maxOutputTokens",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1224,7 +4891,31 @@ const fieldsMap = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   top_p: "topP",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1232,7 +4923,31 @@ const fieldsMap = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   frequency_penalty: "frequencyPenalty",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1240,7 +4955,31 @@ const fieldsMap = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1248,7 +4987,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   let cfg = {};
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1256,7 +5019,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   for (let key in req) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1264,7 +5051,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     if (matchedKey) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1272,11 +5083,47 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1284,7 +5131,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     switch(req.response_format.type) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1292,7 +5163,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         cfg.responseSchema = req.response_format.json_schema?.schema;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1300,7 +5195,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           cfg.responseMimeType = "text/x.enum";
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1308,7 +5227,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1316,7 +5259,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       case "json_object":
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1324,7 +5291,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         break;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1332,7 +5323,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         cfg.responseMimeType = "text/plain";
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1340,7 +5355,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       default:
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1348,7 +5387,31 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1356,11 +5419,59 @@ const transformConfig = (req) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   return cfg;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1372,7 +5483,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   let mimeType, data;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1380,7 +5515,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1388,7 +5547,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       if (!response.ok) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1396,7 +5579,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1404,7 +5611,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       data = Buffer.from(await response.arrayBuffer()).toString("base64");
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1412,11 +5643,47 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       throw new Error("Error fetching image: " + err.toString());
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1424,7 +5691,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const match = url.match(/^data:(?<mimeType>.*?)(;base64)?,(?<data>.*)$/);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1432,7 +5723,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       throw new Error("Invalid image data: " + url);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1440,7 +5755,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     ({ mimeType, data } = match.groups);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1448,7 +5787,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   return {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1456,7 +5819,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       mimeType,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1464,7 +5851,31 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     },
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1472,7 +5883,43 @@ const parseImg = async (url) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1484,7 +5931,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const parts = [];
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1492,7 +5963,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     // system, user: string
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1500,7 +5995,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     parts.push({ text: content });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1508,7 +6027,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1516,7 +6059,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   // An array of content parts with a defined type.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1524,7 +6091,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   // Can contain text, image, or audio inputs.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1532,7 +6123,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     switch (item.type) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1540,11 +6155,47 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         parts.push({ text: item.text });
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         break;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1552,11 +6203,47 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         parts.push(await parseImg(item.image_url.url));
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         break;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1564,7 +6251,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         parts.push({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1572,7 +6283,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             mimeType: "audio/" + item.input_audio.format,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1580,7 +6315,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1588,7 +6347,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         break;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1596,7 +6379,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         throw new TypeError(`Unknown "content" item type: "${item.type}"`);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1604,7 +6411,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1612,7 +6443,31 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     parts.push({ text: "" }); // to avoid "Unable to submit request because it must have a text parameter"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1620,11 +6475,59 @@ const transformMsg = async ({ role, content }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   return { role, parts };
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1636,7 +6539,31 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (!messages) { return; }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1644,7 +6571,31 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   let system_instruction;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1652,7 +6603,31 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     if (item.role === "system") {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1660,7 +6635,31 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       system_instruction = await transformMsg(item);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1668,7 +6667,31 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       item.role = item.role === "assistant" ? "model" : "user";
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1676,11 +6699,47 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1688,7 +6747,31 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     contents.push({ role: "model", parts: { text: " " } });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1696,7 +6779,31 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   //console.info(JSON.stringify(contents, 2));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1704,7 +6811,43 @@ const transformMessages = async (messages) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1716,7 +6859,31 @@ const transformRequest = async (req) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   ...await transformMessages(req.messages),
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1724,11 +6891,59 @@ const transformRequest = async (req) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   generationConfig: transformConfig(req),
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1740,7 +6955,31 @@ const generateChatcmplId = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1748,11 +6987,59 @@ const generateChatcmplId = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   return "chatcmpl-" + Array.from({ length: 29 }, randomChar).join("");
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1764,7 +7051,31 @@ const reasonsMap = { //https://ai.google.dev/api/rest/v1/GenerateContentResponse
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   //"FINISH_REASON_UNSPECIFIED": // Default value. This value is unused.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1772,7 +7083,31 @@ const reasonsMap = { //https://ai.google.dev/api/rest/v1/GenerateContentResponse
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   "MAX_TOKENS": "length",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1780,7 +7115,31 @@ const reasonsMap = { //https://ai.google.dev/api/rest/v1/GenerateContentResponse
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   "RECITATION": "content_filter",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1788,7 +7147,31 @@ const reasonsMap = { //https://ai.google.dev/api/rest/v1/GenerateContentResponse
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   // :"function_call",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1796,7 +7179,31 @@ const reasonsMap = { //https://ai.google.dev/api/rest/v1/GenerateContentResponse
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const SEP = "\n\n|>";
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1804,7 +7211,31 @@ const transformCandidates = (key, cand) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   index: cand.index || 0, // 0-index is absent in new -002 models response
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1812,7 +7243,31 @@ const transformCandidates = (key, cand) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     role: "assistant",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1820,7 +7275,31 @@ const transformCandidates = (key, cand) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   logprobs: null,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1828,11 +7307,47 @@ const transformCandidates = (key, cand) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 });
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const transformCandidatesMessage = transformCandidates.bind(null, "message");
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1844,7 +7359,43 @@ const transformCandidatesDelta = transformCandidates.bind(null, "delta");
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const transformUsage = (data) => ({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1852,11 +7403,47 @@ const transformUsage = (data) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   prompt_tokens: data.promptTokenCount,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   total_tokens: data.totalTokenCount
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1868,7 +7455,43 @@ const transformUsage = (data) => ({
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const processCompletionsResponse = (data, model, id) => {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1876,7 +7499,31 @@ const processCompletionsResponse = (data, model, id) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     id,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1884,7 +7531,31 @@ const processCompletionsResponse = (data, model, id) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     created: Math.floor(Date.now()/1000),
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1892,7 +7563,31 @@ const processCompletionsResponse = (data, model, id) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     //system_fingerprint: "fp_69829325d0",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1900,11 +7595,47 @@ const processCompletionsResponse = (data, model, id) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     usage: transformUsage(data.usageMetadata),
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1916,7 +7647,43 @@ const processCompletionsResponse = (data, model, id) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const responseLineRE = /^data: (.*)(?:\n\n|\r\r|\r\n\r\n)/;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1924,7 +7691,31 @@ async function parseStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   chunk = await chunk;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1932,7 +7723,31 @@ async function parseStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   this.buffer += chunk;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1940,7 +7755,31 @@ async function parseStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const match = this.buffer.match(responseLineRE);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1948,7 +7787,31 @@ async function parseStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     controller.enqueue(match[1]);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1956,11 +7819,47 @@ async function parseStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   } while (true); // eslint-disable-line no-constant-condition
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1968,7 +7867,31 @@ async function parseStreamFlush (controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (this.buffer) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1976,7 +7899,31 @@ async function parseStreamFlush (controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     controller.enqueue(this.buffer);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1984,7 +7931,43 @@ async function parseStreamFlush (controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1996,7 +7979,31 @@ function transformResponseStream (data, stop, first) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const item = transformCandidatesDelta(data.candidates[0]);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2004,7 +8011,31 @@ function transformResponseStream (data, stop, first) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (first) { item.delta.content = ""; } else { delete item.delta.role; }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2012,7 +8043,31 @@ function transformResponseStream (data, stop, first) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     id: this.id,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2020,7 +8075,31 @@ function transformResponseStream (data, stop, first) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     created: Math.floor(Date.now()/1000),
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2028,7 +8107,31 @@ function transformResponseStream (data, stop, first) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     //system_fingerprint: "fp_69829325d0",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2036,7 +8139,31 @@ function transformResponseStream (data, stop, first) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2044,11 +8171,47 @@ function transformResponseStream (data, stop, first) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     output.usage = stop ? transformUsage(data.usageMetadata) : null;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2056,7 +8219,31 @@ function transformResponseStream (data, stop, first) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2064,11 +8251,47 @@ const delimiter = "\n\n";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const transform = transformResponseStream.bind(this);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2076,7 +8299,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (!line) { return; }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2084,7 +8331,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   try {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2092,7 +8363,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   } catch (err) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2100,7 +8395,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     console.error(err);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2108,7 +8427,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const candidates = Array.from({ length }, (_, index) => ({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2116,7 +8459,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       content: { parts: [{ text: err }] },
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2124,7 +8491,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     }));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2132,7 +8523,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2140,7 +8555,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   console.assert(data.candidates.length === 1, "Unexpected candidates count: %d", data.candidates.length);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2148,7 +8587,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (!this.last[cand.index]) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2156,7 +8619,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2164,7 +8651,31 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   if (cand.content) { // prevent empty data (e.g. when MAX_TOKENS)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2172,11 +8683,47 @@ async function toOpenAiStream (chunk, controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2184,7 +8731,31 @@ async function toOpenAiStreamFlush (controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const transform = transformResponseStream.bind(this);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2192,7 +8763,31 @@ async function toOpenAiStreamFlush (controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     for (const data of this.last) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2200,7 +8795,31 @@ async function toOpenAiStreamFlush (controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2208,8 +8827,149 @@ async function toOpenAiStreamFlush (controller) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+=======
+function transformResponseStream (data, stop, first) {
+
+  const item = transformCandidatesDelta(data.candidates[0]);
+
+  if (stop) { item.delta = {}; } else { item.finish_reason = null; }
+
+  if (first) { item.delta.content = ""; } else { delete item.delta.role; }
+
+  const output = {
+
+    id: this.id,
+
+    choices: [item],
+
+    created: Math.floor(Date.now()/1000),
+
+    model: this.model,
+
+    //system_fingerprint: "fp_69829325d0",
+
+    object: "chat.completion.chunk",
+
+  };
+
+  if (data.usageMetadata && this.streamIncludeUsage) {
+
+    output.usage = stop ? transformUsage(data.usageMetadata) : null;
+
+  }
+
+  return "data: " + JSON.stringify(output) + delimiter;
+
+}
+
+const delimiter = "\n\n";
+
+async function toOpenAiStream (chunk, controller) {
+
+  const transform = transformResponseStream.bind(this);
+
+  const line = await chunk;
+
+  if (!line) { return; }
+
+  let data;
+
+  try {
+
+    data = JSON.parse(line);
+
+  } catch (err) {
+
+    console.error(line);
+
+    console.error(err);
+
+    const length = this.last.length || 1; // at least 1 error msg
+
+    const candidates = Array.from({ length }, (_, index) => ({
+
+      finishReason: "error",
+
+      content: { parts: [{ text: err }] },
+
+      index,
+
+    }));
+
+    data = { candidates };
+
+  }
+
+  const cand = data.candidates[0];
+
+  console.assert(data.candidates.length === 1, "Unexpected candidates count: %d", data.candidates.length);
+
+  cand.index = cand.index || 0; // absent in new -002 models response
+
+  if (!this.last[cand.index]) {
+
+    controller.enqueue(transform(data, false, "first"));
+
+  }
+
+  this.last[cand.index] = data;
+
+  if (cand.content) { // prevent empty data (e.g. when MAX_TOKENS)
+
+    controller.enqueue(transform(data));
+
+  }
+
+}
+
+async function toOpenAiStreamFlush (controller) {
+
+  const transform = transformResponseStream.bind(this);
+
+  if (this.last.length > 0) {
+
+    for (const data of this.last) {
+
+      controller.enqueue(transform(data, "stop"));
+
+    }
+
+    controller.enqueue("data: [DONE]" + delimiter);
+
+  }
+
+}
+
+>>>>>>>
