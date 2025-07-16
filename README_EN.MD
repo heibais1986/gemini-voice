@@ -6,7 +6,7 @@
 Available on Bilibili, YouTube, Douyin, and WeChat Official Account under the same name. Please credit the author when reposting.
 
 ## Project Overview
-#### Demo: [https://play.210718.xyz](https://play.210718.xyz)
+#### Demo: [https://docman.edu.kg](https://docman.edu.kg)
 Deploy a Gemini multimodal chat website in 10 seconds with just a Gemini API Key.
 Accessible from any region/network environment, ready to use immediately.
 Free serverless deployment using Deno/Cloudflare Worker.
@@ -15,7 +15,7 @@ Compatible with AI programming, can be integrated with ChatBox and other AI clie
 
 ## Deno Deployment (Recommended)
 
-1. [Fork](https://github.com/tech-shrimp/gemini-playground/fork) this project
+1. [Fork](https://github.com/heibais1986/gemini-playground/fork) this project
 2. Login/Register at https://dash.deno.com/
 3. Create a project at https://dash.deno.com/new_project
 4. Select this project, enter project name (please choose carefully as it affects the auto-assigned domain)
@@ -30,7 +30,7 @@ Compatible with AI programming, can be integrated with ChatBox and other AI clie
 
 ## Cloudflare Worker Deployment
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tech-shrimp/gemini-playground)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/heibais1986/gemini-playground)
 1. Click the deploy button
 2. Login to your Cloudflare account
 3. Enter Account ID and API Token

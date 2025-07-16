@@ -2,14 +2,10 @@
 chcp 65001 >nul
 setlocal enabledelayedexpansion
 
-echo 🔐 Cloudflare Secrets 设置向导
 echo ================================
 echo.
-echo 此脚本将帮助您安全地设置敏感的环境变量到Cloudflare Secrets中。
-echo 这些密钥不会存储在代码仓库中，确保了安全性。
 echo.
 
-REM 检查wrangler是否已安装
 wrangler --version >nul 2>&1
 if errorlevel 1 (
     echo ❌ 错误: wrangler CLI 未安装
@@ -18,7 +14,6 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM 检查是否已登录
 wrangler whoami >nul 2>&1
 if errorlevel 1 (
     echo ❌ 错误: 未登录到Cloudflare
