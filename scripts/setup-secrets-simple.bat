@@ -1,10 +1,9 @@
 @echo off
 echo Cloudflare Secrets 设置向导 - 简化版
-echo ========================================
+echo =====
 echo.
 echo 此脚本将帮助您设置Cloudflare Secrets
 echo.
-
 REM 检查wrangler
 echo 检查 wrangler CLI...
 wrangler --version >nul 2>&1
@@ -14,10 +13,8 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-
 echo wrangler CLI 已安装
 echo.
-
 REM 检查登录状态
 echo 检查登录状态...
 wrangler whoami >nul 2>&1
@@ -27,13 +24,10 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-
 echo 已登录到Cloudflare
 echo.
-
 echo 开始设置必需的密钥...
 echo.
-
 REM 设置 SERVER_GEMINI_API_KEY
 echo 1. 设置 SERVER_GEMINI_API_KEY
 echo    描述: 服务器使用的Gemini API Key（付费用户将使用此密钥）
@@ -51,7 +45,6 @@ if /i "%choice1%"=="y" (
     )
 )
 echo.
-
 REM 设置 JWT_SECRET
 echo 2. 设置 JWT_SECRET
 echo    描述: 用于签名JWT令牌的密钥（建议64位随机字符串）
@@ -72,7 +65,6 @@ if /i "%choice2%"=="y" (
     )
 )
 echo.
-
 REM 设置 ENCRYPTION_KEY
 echo 3. 设置 ENCRYPTION_KEY
 echo    描述: 用于加密用户API Key的密钥（建议32位随机字符串）
@@ -93,10 +85,8 @@ if /i "%choice3%"=="y" (
     )
 )
 echo.
-
 echo 可选密钥设置...
 echo.
-
 REM 设置 WECHAT_APP_SECRET
 echo 4. 设置 WECHAT_APP_SECRET（可选）
 echo    描述: 微信应用密钥（如需微信登录功能）
@@ -111,7 +101,6 @@ if /i "%choice4%"=="y" (
     )
 )
 echo.
-
 echo 密钥设置完成！
 echo.
 echo 查看已设置的密钥:

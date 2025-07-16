@@ -30,9 +30,7 @@ const languages = [
     { name: 'Russian (Russia)', code: 'ru-RU' },
     { name: 'Thai (Thailand)', code: 'th-TH' }
 ];
-
 function getLanguage(languageCode) {
     return languages.find(lang => lang.code === languageCode);
 }
-
 export { languages, getLanguage };

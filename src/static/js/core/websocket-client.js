@@ -3,7 +3,6 @@ import { blobToJSON, base64ToArrayBuffer } from '../utils/utils.js';
 import { ApplicationError, ErrorCodes } from '../utils/error-boundary.js';
 import { Logger } from '../utils/logger.js';
 import { ToolManager } from '../tools/tool-manager.js';
-
 /**
  * Client for interacting with the Gemini Multimodal Live API via WebSockets.
  * This class handles the connection, sending and receiving messages, and processing responses.
@@ -29,7 +28,6 @@ export class MultimodalLiveClient extends EventEmitter {
         this.send = this.send.bind(this);
         this.toolManager = new ToolManager();
     }
-
     /**
      * Logs a message with a timestamp and type. Emits a 'log' event.
      *
@@ -39,7 +37,6 @@ export class MultimodalLiveClient extends EventEmitter {
     log(type, message) {
         this.emit('log', { date: new Date(), type, message });
     }
-
     /**
      * Connects to the WebSocket server with the given configuration.
      * The configuration can include model settings, generation config, system instructions, and tools.
@@ -69,14 +66,11 @@ export class MultimodalLiveClient extends EventEmitter {
         this.apiKey = apiKey;
         return this._connect();
     }
-
     async _connect() {
         if (this.isConnecting) return false;
         this.isConnecting = true;
-
         try {
             const ws = new WebSocket(`${this.baseUrl}?key=${this.apiKey}`);
-            
             ws.addEventListener('message', async (evt) => {
                 if (evt.data instanceof Blob) {
                     this.receive(evt.data);
@@ -84,7 +78,6 @@ export class MultimodalLiveClient extends EventEmitter {
                     console.log('Non-blob message', evt);
                 }
             });
-
             return new Promise((resolve, reject) => {
                 const onError = (ev) => {
                     this.isConnecting = false;
@@ -97,7 +90,6 @@ export class MultimodalLiveClient extends EventEmitter {
                         { originalError: ev }
                     ));
                 };
-
                 ws.addEventListener('error', onError);
                 ws.addEventListener('open', (ev) => {
                     if (!this.config) {
@@ -107,14 +99,11 @@ export class MultimodalLiveClient extends EventEmitter {
                     }
                     this.log(`client.${ev.type}`, 'Connected to socket');
                     this.emit('open');
-
                     this.ws = ws;
                     this.isConnecting = false;
-
                     const setupMessage = { setup: this.config };
                     this._sendDirect(setupMessage);
                     this.log('client.send', 'setup');
-
                     ws.removeEventListener('error', onError);
                     ws.addEventListener('close', (ev) => {
                         this.disconnect(ws);
@@ -137,7 +126,6 @@ export class MultimodalLiveClient extends EventEmitter {
             throw error;
         }
     }
-
     async _ensureConnection() {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
             this.log('client.reconnect', 'Connection lost, attempting to reconnect...');
@@ -155,7 +143,6 @@ export class MultimodalLiveClient extends EventEmitter {
         }
         return true;
     }
-
     /**
      * Disconnects from the WebSocket server.
      *
@@ -171,7 +158,6 @@ export class MultimodalLiveClient extends EventEmitter {
         }
         return false;
     }
-
     /**
      * Receives and processes a message from the WebSocket server.
      * Handles different types of responses like tool calls, setup completion, and server content.
@@ -211,7 +197,6 @@ export class MultimodalLiveClient extends EventEmitter {
                 const audioParts = parts.filter((p) => p.inlineData && p.inlineData.mimeType.startsWith('audio/pcm'));
                 const base64s = audioParts.map((p) => p.inlineData?.data);
                 const otherParts = parts.filter((p) => !audioParts.includes(p));
-
                 base64s.forEach((b64) => {
                     if (b64) {
                         const data = base64ToArrayBuffer(b64);
@@ -219,11 +204,9 @@ export class MultimodalLiveClient extends EventEmitter {
                         //this.log(`server.audio`, `buffer (${data.byteLength})`);
                     }
                 });
-
                 if (!otherParts.length) {
                     return;
                 }
-
                 parts = otherParts;
                 const content = { modelTurn: { parts } };
                 this.emit('content', content);
@@ -233,7 +216,6 @@ export class MultimodalLiveClient extends EventEmitter {
             console.log('Received unmatched message', response);
         }
     }
-
     /**
      * Sends real-time input data to the server.
      *
@@ -243,7 +225,6 @@ export class MultimodalLiveClient extends EventEmitter {
         let hasAudio = false;
         let hasVideo = false;
         let totalSize = 0;
-
         for (let i = 0; i < chunks.length; i++) {
             const ch = chunks[i];
             totalSize += ch.data.length;
@@ -254,15 +235,12 @@ export class MultimodalLiveClient extends EventEmitter {
                 hasVideo = true;
             }
         }
-
         const message = hasAudio && hasVideo ? 'audio + video' : hasAudio ? 'audio' : hasVideo ? 'video' : 'unknown';
         Logger.debug(`Sending realtime input: ${message} (${Math.round(totalSize/1024)}KB)`);
-
         const data = { realtimeInput: { mediaChunks: chunks } };
         this._sendDirect(data);
         //this.log(`client.realtimeInput`, message);
     }
-
     /**
      * Sends a tool response to the server.
      *
@@ -273,7 +251,6 @@ export class MultimodalLiveClient extends EventEmitter {
         this._sendDirect(message);
         this.log(`client.toolResponse`, message);
     }
-
     /**
      * Sends a message to the server.
      *
@@ -290,7 +267,6 @@ export class MultimodalLiveClient extends EventEmitter {
                 { originalError: error }
             );
         }
-
         parts = Array.isArray(parts) ? parts : [parts];
         const formattedParts = parts.map(part => {
             if (typeof part === 'string') {
@@ -305,7 +281,6 @@ export class MultimodalLiveClient extends EventEmitter {
         this._sendDirect(clientContentRequest);
         this.log(`client.send`, clientContentRequest);
     }
-
     /**
      * Sends a message directly to the WebSocket server.
      *
@@ -320,7 +295,6 @@ export class MultimodalLiveClient extends EventEmitter {
         const str = JSON.stringify(request);
         this.ws.send(str);
     }
-
     /**
      * Handles a tool call from the server.
      *

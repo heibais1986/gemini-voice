@@ -1,11 +1,9 @@
 @echo off
 chcp 65001 >nul
 setlocal enabledelayedexpansion
-
-echo ================================
+echo ====
 echo.
 echo.
-
 wrangler --version >nul 2>&1
 if errorlevel 1 (
     echo ❌ 错误: wrangler CLI 未安装
@@ -13,7 +11,6 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-
 wrangler whoami >nul 2>&1
 if errorlevel 1 (
     echo ❌ 错误: 未登录到Cloudflare
@@ -21,16 +18,12 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-
 echo ✅ wrangler CLI 已就绪
 echo.
-
 echo 🔑 开始设置密钥...
 echo.
-
 echo === 必需的密钥 ===
 echo.
-
 REM JWT密钥
 echo 📝 设置 JWT_SECRET
 echo 描述: 用于签名JWT令牌的密钥
@@ -44,7 +37,6 @@ if /i "!auto_jwt!"=="y" (
     call :set_secret "JWT_SECRET" "用于签名JWT令牌的密钥"
 )
 echo.
-
 REM 加密密钥
 echo 📝 设置 ENCRYPTION_KEY
 echo 描述: 用于加密用户API Key的密钥
@@ -58,28 +50,22 @@ if /i "!auto_enc!"=="y" (
     call :set_secret "ENCRYPTION_KEY" "用于加密用户API Key的密钥"
 )
 echo.
-
 REM 服务器API密钥
 call :set_secret "SERVER_GEMINI_API_KEY" "服务器使用的Gemini API Key（付费用户将使用此密钥）"
-
 echo.
 echo === 可选的密钥 ===
 echo.
-
 REM 微信相关密钥
 call :set_secret_optional "WECHAT_APP_SECRET" "微信应用密钥（如需微信登录功能）"
-
 REM 支付相关密钥
 call :set_secret_optional "ALIPAY_PRIVATE_KEY" "支付宝应用私钥（如需支付宝支付功能）"
 call :set_secret_optional "ALIPAY_PUBLIC_KEY" "支付宝公钥（如需支付宝支付功能）"
 call :set_secret_optional "WECHAT_PAY_API_KEY" "微信支付API密钥（如需微信支付功能）"
-
 echo.
 echo 🎉 密钥设置完成！
 echo.
 echo 📋 已设置的密钥列表:
 wrangler secret list
-
 echo.
 echo 🔒 安全提醒:
 echo 1. 这些密钥已安全存储在Cloudflare中，不会出现在您的代码仓库中
@@ -90,7 +76,6 @@ echo.
 echo ✅ 现在可以安全地部署您的应用了！
 pause
 exit /b 0
-
 :set_secret
 set secret_name=%~1
 set description=%~2
@@ -112,7 +97,6 @@ if /i "!choice!"=="y" (
 )
 echo.
 goto :eof
-
 :set_secret_optional
 set secret_name=%~1
 set description=%~2

@@ -21,5 +21,4 @@ export const CONFIG = {
         CHANNELS: 1
     }
 };
-
 export default CONFIG; 
