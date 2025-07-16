@@ -103,9 +103,6 @@ dist
 .dev.vars
 .wrangler/
 deno.lock
-.dev.vars
-.wrangler/
-deno.lock
 # 安全相关文件
 *.key
 *.pem

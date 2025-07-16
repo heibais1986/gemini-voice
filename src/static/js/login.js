@@ -1,4 +1,3 @@
- 
 /**
  * 登录页面JavaScript
  */
@@ -7,10 +6,12 @@ class LoginManager {
         this.sessionToken = localStorage.getItem('sessionToken');
         this.init();
     }
+
     init() {
         this.bindEvents();
         this.checkLoginStatus();
     }
+
     bindEvents() {
         // 标签切换
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -18,211 +19,339 @@ class LoginManager {
                 this.switchTab(e.target.dataset.tab);
             });
         });
+
         // 手机号登录
         document.getElementById('phoneLoginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             this.handlePhoneLogin();
         });
+
         // 发送验证码
         document.getElementById('sendCodeBtn').addEventListener('click', () => {
             this.sendVerificationCode();
         });
+
         // 微信登录二维码生成
         document.getElementById('generateQRBtn').addEventListener('click', () => {
             this.generateWechatQR();
         });
+
         // 用户操作按钮
         document.getElementById('upgradeBtn').addEventListener('click', () => {
             this.showPaymentModal();
         });
+
         document.getElementById('apiKeyBtn').addEventListener('click', () => {
             this.showApiKeyModal();
         });
+
         document.getElementById('logoutBtn').addEventListener('click', () => {
             this.logout();
         });
+
         // 模态框关闭
         document.getElementById('closePaymentModal').addEventListener('click', () => {
             this.hidePaymentModal();
         });
+
         document.getElementById('closeApiKeyModal').addEventListener('click', () => {
             this.hideApiKeyModal();
         });
-        // 支付方式选择
-        document.querySelectorAll('.payment-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.handlePayment(e.target.dataset.method);
-            });
+
+        // 支付按钮
+        document.getElementById('wechatPayBtn').addEventListener('click', () => {
+            this.processPayment('wechat');
         });
-        // API Key 表单
-        document.getElementById('apiKeyForm').addEventListener('submit', (e) => {
-            e.preventDefault();
+
+        document.getElementById('alipayBtn').addEventListener('click', () => {
+            this.processPayment('alipay');
+        });
+
+        // API Key 保存
+        document.getElementById('saveApiKeyBtn').addEventListener('click', () => {
             this.saveApiKey();
         });
-        document.getElementById('cancelApiKey').addEventListener('click', () => {
-            this.hideApiKeyModal();
-        });
-        // 消息关闭
-        document.getElementById('closeMessage').addEventListener('click', () => {
-            this.hideMessage();
-        });
-        // 点击模态框外部关闭
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
-            }
-        });
     }
-    switchTab(tab) {
-        // 更新标签按钮状态
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-        // 更新内容显示
+
+    switchTab(tabName) {
+        // 隐藏所有标签内容
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
-        document.getElementById(`${tab}Tab`).classList.add('active');
+
+        // 移除所有按钮的活动状态
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // 显示选中的标签内容
+        document.getElementById(tabName).classList.add('active');
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
     }
-    async checkLoginStatus() {
-        if (!this.sessionToken) {
-            this.showLoginForm();
+
+    async handlePhoneLogin() {
+        const phone = document.getElementById('phone').value;
+        const code = document.getElementById('verificationCode').value;
+
+        if (!phone || !code) {
+            this.showMessage('请输入手机号和验证码', 'error');
             return;
         }
+
+        try {
+            const response = await fetch('/api/auth/phone-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ phone, code })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.handleLoginSuccess(data);
+            } else {
+                this.showMessage(data.message || '登录失败', 'error');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showMessage('网络错误，请重试', 'error');
+        }
+    }
+
+    async sendVerificationCode() {
+        const phone = document.getElementById('phone').value;
+        const sendBtn = document.getElementById('sendCodeBtn');
+
+        if (!phone) {
+            this.showMessage('请输入手机号', 'error');
+            return;
+        }
+
+        if (!/^1[3-9]\d{9}$/.test(phone)) {
+            this.showMessage('请输入正确的手机号', 'error');
+            return;
+        }
+
+        try {
+            sendBtn.disabled = true;
+            sendBtn.textContent = '发送中...';
+
+            const response = await fetch('/api/auth/send-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ phone })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showMessage('验证码已发送', 'success');
+                this.startCountdown(sendBtn);
+            } else {
+                this.showMessage(data.message || '发送失败', 'error');
+                sendBtn.disabled = false;
+                sendBtn.textContent = '发送验证码';
+            }
+        } catch (error) {
+            console.error('Send code error:', error);
+            this.showMessage('网络错误，请重试', 'error');
+            sendBtn.disabled = false;
+            sendBtn.textContent = '发送验证码';
+        }
+    }
+
+    startCountdown(button) {
+        let countdown = 60;
+        const timer = setInterval(() => {
+            button.textContent = `${countdown}秒后重试`;
+            countdown--;
+
+            if (countdown < 0) {
+                clearInterval(timer);
+                button.disabled = false;
+                button.textContent = '发送验证码';
+            }
+        }, 1000);
+    }
+
+    async generateWechatQR() {
+        const generateBtn = document.getElementById('generateQRBtn');
+        const qrContainer = document.getElementById('qrContainer');
+
+        try {
+            generateBtn.disabled = true;
+            generateBtn.textContent = '生成中...';
+
+            const response = await fetch('/api/auth/wechat-qr', {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.displayQRCode(data.qrCode, data.scene);
+                this.pollWechatLogin(data.scene);
+            } else {
+                this.showMessage(data.message || '生成二维码失败', 'error');
+            }
+        } catch (error) {
+            console.error('Generate QR error:', error);
+            this.showMessage('网络错误，请重试', 'error');
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.textContent = '生成二维码';
+        }
+    }
+
+    displayQRCode(qrCodeUrl, scene) {
+        const qrContainer = document.getElementById('qrContainer');
+        qrContainer.innerHTML = `
+            <div class="qr-code">
+                <img src="${qrCodeUrl}" alt="微信登录二维码">
+                <p>请使用微信扫描二维码登录</p>
+                <div class="qr-status" id="qrStatus">等待扫描...</div>
+            </div>
+        `;
+        qrContainer.style.display = 'block';
+    }
+
+    async pollWechatLogin(scene) {
+        const maxAttempts = 60; // 5分钟
+        let attempts = 0;
+
+        const poll = async () => {
+            if (attempts >= maxAttempts) {
+                document.getElementById('qrStatus').textContent = '二维码已过期，请重新生成';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/auth/wechat-status/${scene}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.status === 'scanned') {
+                        document.getElementById('qrStatus').textContent = '已扫描，请在手机上确认';
+                    } else if (data.status === 'confirmed') {
+                        this.handleLoginSuccess(data);
+                        return;
+                    }
+                }
+
+                attempts++;
+                setTimeout(poll, 5000); // 每5秒检查一次
+            } catch (error) {
+                console.error('Poll wechat login error:', error);
+                attempts++;
+                setTimeout(poll, 5000);
+            }
+        };
+
+        poll();
+    }
+
+    handleLoginSuccess(data) {
+        // 保存会话令牌
+        localStorage.setItem('sessionToken', data.sessionToken);
+        
+        // 设置Cookie
+        const expires = new Date(data.expiresAt);
+        document.cookie = `sessionToken=${encodeURIComponent(data.sessionToken)}; path=/; expires=${expires.toUTCString()}; secure; samesite=strict`;
+
+        this.showMessage('登录成功！', 'success');
+        
+        // 延迟跳转到主页
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 1000);
+    }
+
+    checkLoginStatus() {
+        if (this.sessionToken) {
+            // 验证会话令牌
+            this.verifySession();
+        }
+    }
+
+    async verifySession() {
         try {
             const response = await fetch('/api/user/profile', {
                 headers: {
                     'Authorization': `Bearer ${this.sessionToken}`
                 }
             });
+
             if (response.ok) {
                 const data = await response.json();
-                this.showUserInfo(data.user);
+                this.showUserDashboard(data.user);
             } else {
+                // 会话无效，清除令牌
                 localStorage.removeItem('sessionToken');
                 this.sessionToken = null;
-                this.showLoginForm();
             }
         } catch (error) {
-            console.error('Check login status failed:', error);
-            this.showLoginForm();
+            console.error('Session verification error:', error);
+            localStorage.removeItem('sessionToken');
+            this.sessionToken = null;
         }
     }
-    async handlePhoneLogin() {
-        const phone = document.getElementById('phone').value;
-        const verificationCode = document.getElementById('verificationCode').value;
-        if (!phone || !verificationCode) {
-            this.showMessage('请填写完整信息', 'error');
-            return;
+
+    showUserDashboard(user) {
+        // 隐藏登录表单
+        document.getElementById('loginContainer').style.display = 'none';
+        
+        // 显示用户仪表板
+        const dashboard = document.getElementById('userDashboard');
+        dashboard.style.display = 'block';
+        
+        // 更新用户信息
+        document.getElementById('userName').textContent = user.username || '用户';
+        document.getElementById('userPhone').textContent = user.phone || '';
+        document.getElementById('userType').textContent = user.user_type === 'premium' ? '付费用户' : '免费用户';
+        document.getElementById('apiCallsUsed').textContent = user.api_calls_today || 0;
+        document.getElementById('apiCallsLimit').textContent = user.user_type === 'premium' ? '1000' : '100';
+        
+        if (user.premium_expires_at) {
+            document.getElementById('premiumExpiry').textContent = new Date(user.premium_expires_at).toLocaleDateString();
+            document.getElementById('premiumInfo').style.display = 'block';
         }
-        this.showLoading();
-        try {
-            const response = await fetch('/api/auth/login/phone', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    phone: phone,
-                    verificationCode: verificationCode
-                })
-            });
-            const data = await response.json();
-            if (data.success) {
-                this.sessionToken = data.sessionToken;
-                localStorage.setItem('sessionToken', this.sessionToken);
-                this.showUserInfo(data.user);
-                this.showMessage('登录成功', 'success');
-            } else {
-                this.showMessage(data.error || '登录失败', 'error');
-            }
-        } catch (error) {
-            console.error('Phone login failed:', error);
-            this.showMessage('登录失败，请重试', 'error');
-        } finally {
-            this.hideLoading();
+        
+        // 根据用户类型显示相应按钮
+        if (user.user_type === 'free') {
+            document.getElementById('upgradeBtn').style.display = 'block';
+            document.getElementById('apiKeyBtn').style.display = 'block';
+        } else {
+            document.getElementById('upgradeBtn').style.display = 'none';
+            document.getElementById('apiKeyBtn').style.display = 'none';
         }
     }
-    async sendVerificationCode() {
-        const phone = document.getElementById('phone').value;
-        if (!phone) {
-            this.showMessage('请输入手机号', 'error');
-            return;
-        }
-        const btn = document.getElementById('sendCodeBtn');
-        btn.disabled = true;
-        // 倒计时
-        let countdown = 60;
-        const timer = setInterval(() => {
-            btn.textContent = `${countdown}秒后重试`;
-            countdown--;
-            if (countdown < 0) {
-                clearInterval(timer);
-                btn.disabled = false;
-                btn.textContent = '发送验证码';
-            }
-        }, 1000);
-        // 这里应该调用发送短信验证码的API
-        // 暂时模拟成功
-        this.showMessage('验证码已发送（测试环境请使用：123456）', 'success');
+
+    showPaymentModal() {
+        document.getElementById('paymentModal').style.display = 'block';
     }
-    generateWechatQR() {
-        // 这里应该生成微信登录二维码
-        // 暂时显示提示
-        this.showMessage('微信登录功能开发中', 'error');
+
+    hidePaymentModal() {
+        document.getElementById('paymentModal').style.display = 'none';
     }
-    async logout() {
-        if (!this.sessionToken) return;
-        try {
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.sessionToken}`
-                }
-            });
-        } catch (error) {
-            console.error('Logout failed:', error);
-        }
-        localStorage.removeItem('sessionToken');
-        this.sessionToken = null;
-        this.showLoginForm();
-        this.showMessage('已退出登录', 'success');
-    }
-    async saveApiKey() {
-        const apiKey = document.getElementById('apiKey').value;
-        if (!apiKey) {
-            this.showMessage('请输入API Key', 'error');
-            return;
-        }
-        this.showLoading();
-        try {
-            const response = await fetch('/api/user/api-key', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.sessionToken}`
-                },
-                body: JSON.stringify({ apiKey })
-            });
-            const data = await response.json();
-            if (data.success) {
-                this.hideApiKeyModal();
-                this.showMessage('API Key 保存成功', 'success');
-                // 刷新用户信息
-                this.checkLoginStatus();
-            } else {
-                this.showMessage(data.error || 'API Key 保存失败', 'error');
-            }
-        } catch (error) {
-            console.error('Save API key failed:', error);
-            this.showMessage('保存失败，请重试', 'error');
-        } finally {
-            this.hideLoading();
+
+    showApiKeyModal() {
+        document.getElementById('apiKeyModal').style.display = 'block';
+        // 加载当前保存的API Key
+        const savedApiKey = localStorage.getItem('gemini_api_key');
+        if (savedApiKey) {
+            document.getElementById('userApiKey').value = savedApiKey;
         }
     }
-    async handlePayment(method) {
-        this.showLoading();
+
+    hideApiKeyModal() {
+        document.getElementById('apiKeyModal').style.display = 'none';
+    }
+
+    async processPayment(method) {
         try {
             const response = await fetch('/api/payment/create', {
                 method: 'POST',
@@ -231,411 +360,118 @@ class LoginManager {
                     'Authorization': `Bearer ${this.sessionToken}`
                 },
                 body: JSON.stringify({
-                    paymentMethod: method,
-                    amount: 20.00
+                    method: method,
+                    amount: 20.00,
+                    description: '升级到付费用户'
                 })
             });
+
             const data = await response.json();
-            if (data.success) {
-                this.hidePaymentModal();
-                this.showMessage(`${method === 'wechat' ? '微信' : '支付宝'}支付订单已创建`, 'success');
-                // 这里应该跳转到支付页面或显示支付二维码
-            } else {
-                this.showMessage(data.error || '创建支付订单失败', 'error');
-            }
-        } catch (error) {
-            console.error('Create payment failed:', error);
-            this.showMessage('创建支付订单失败，请重试', 'error');
-        } finally {
-            this.hideLoading();
-        }
-    }
-    showLoginForm() {
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('userInfo').style.display = 'none';
-    }
-    showUserInfo(user) {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('userInfo').style.display = 'block';
-        // 更新用户信息显示
-        document.getElementById('userName').textContent = user.username || '用户';
-        document.getElementById('userType').textContent = user.user_type === 'premium' ? '付费用户' : '免费用户';
-        if (user.avatar_url) {
-            document.getElementById('userAvatar').src = user.avatar_url;
-        } else {
-            document.getElementById('userAvatar').src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwIDIwQzI0LjQxODMgMjAgMjggMTYuNDE4MyAyOCAxMkMyOCA3LjU4MTcyIDI0LjQxODMgNCAyMCA0QzE1LjU4MTcgNCA0IDcuNTgxNzIgNCAxMkM0IDE2LjQxODMgMTUuNTgxNyAyMCAyMCAyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMCAyNEMxMi4yNjggMjQgNiAzMC4yNjggNiAzOFY0MEgzNFYzOEMzNCAzMC4yNjggMjcuNzMyIDI0IDIwIDI0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cjwvc3ZnPgo=';
-        }
-        if (user.premium_expires_at) {
-            const expiryDate = new Date(user.premium_expires_at);
-            document.getElementById('userExpiry').textContent = `到期时间：${expiryDate.toLocaleDateString()}`;
-        } else {
-            document.getElementById('userExpiry').textContent = '';
-        }
-        // 根据用户类型显示/隐藏升级按钮
-        const upgradeBtn = document.getElementById('upgradeBtn');
-        if (user.user_type === 'premium') {
-            upgradeBtn.style.display = 'none';
-        } else {
-            upgradeBtn.style.display = 'block';
-        }
-    }
-    showPaymentModal() {
-        document.getElementById('paymentModal').style.display = 'block';
-    }
-    hidePaymentModal() {
-        document.getElementById('paymentModal').style.display = 'none';
-    }
-    showApiKeyModal() {
-        document.getElementById('apiKeyModal').style.display = 'block';
-    }
-    hideApiKeyModal() {
-        document.getElementById('apiKeyModal').style.display = 'none';
-        document.getElementById('apiKeyForm').reset();
-    }
-    showLoading() {
-        document.getElementById('loading').style.display = 'flex';
-    }
-    hideLoading() {
-        document.getElementById('loading').style.display = 'none';
-    }
-    showMessage(text, type = 'info') {
-        const messageEl = document.getElementById('message');
-        const messageText = document.getElementById('messageText');
-        messageText.textContent = text;
-        messageEl.className = `message ${type}`;
-        messageEl.style.display = 'flex';
-        // 3秒后自动隐藏
-        setTimeout(() => {
-            this.hideMessage();
-        }, 3000);
-    }
-    hideMessage() {
-        document.getElementById('message').style.display = 'none';
-    }
-}
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', () => {
-    new LoginManager();
-});
-/**
- * 登录页面JavaScript
- */
-class LoginManager {
-    constructor() {
-        this.sessionToken = localStorage.getItem('sessionToken');
-        this.init();
-    }
-    init() {
-        this.bindEvents();
-        this.checkLoginStatus();
-    }
-    bindEvents() {
-        // 标签切换
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.switchTab(e.target.dataset.tab);
-            });
-        });
-        // 手机号登录
-        document.getElementById('phoneLoginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handlePhoneLogin();
-        });
-        // 发送验证码
-        document.getElementById('sendCodeBtn').addEventListener('click', () => {
-            this.sendVerificationCode();
-        });
-        // 微信登录二维码生成
-        document.getElementById('generateQRBtn').addEventListener('click', () => {
-            this.generateWechatQR();
-        });
-        // 用户操作按钮
-        document.getElementById('upgradeBtn').addEventListener('click', () => {
-            this.showPaymentModal();
-        });
-        document.getElementById('apiKeyBtn').addEventListener('click', () => {
-            this.showApiKeyModal();
-        });
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            this.logout();
-        });
-        // 模态框关闭
-        document.getElementById('closePaymentModal').addEventListener('click', () => {
-            this.hidePaymentModal();
-        });
-        document.getElementById('closeApiKeyModal').addEventListener('click', () => {
-            this.hideApiKeyModal();
-        });
-        // 支付方式选择
-        document.querySelectorAll('.payment-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.handlePayment(e.target.dataset.method);
-            });
-        });
-        // API Key 表单
-        document.getElementById('apiKeyForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveApiKey();
-        });
-        document.getElementById('cancelApiKey').addEventListener('click', () => {
-            this.hideApiKeyModal();
-        });
-        // 消息关闭
-        document.getElementById('closeMessage').addEventListener('click', () => {
-            this.hideMessage();
-        });
-        // 点击模态框外部关闭
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
-            }
-        });
-    }
-    switchTab(tab) {
-        // 更新标签按钮状态
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-        // 更新内容显示
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        document.getElementById(`${tab}Tab`).classList.add('active');
-    }
-    async checkLoginStatus() {
-        if (!this.sessionToken) {
-            this.showLoginForm();
-            return;
-        }
-        try {
-            const response = await fetch('/api/user/profile', {
-                headers: {
-                    'Authorization': `Bearer ${this.sessionToken}`
-                }
-            });
+
             if (response.ok) {
-                const data = await response.json();
-                this.showUserInfo(data.user);
-            } else {
-                localStorage.removeItem('sessionToken');
-                this.sessionToken = null;
-                this.showLoginForm();
-            }
-        } catch (error) {
-            console.error('Check login status failed:', error);
-            this.showLoginForm();
-        }
-    }
-    async handlePhoneLogin() {
-        const phone = document.getElementById('phone').value;
-        const verificationCode = document.getElementById('verificationCode').value;
-        if (!phone || !verificationCode) {
-            this.showMessage('请填写完整信息', 'error');
-            return;
-        }
-        this.showLoading();
-        try {
-            const response = await fetch('/api/auth/login/phone', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    phone: phone,
-                    verificationCode: verificationCode
-                })
-            });
-            const data = await response.json();
-            if (data.success) {
-                this.sessionToken = data.sessionToken;
-                localStorage.setItem('sessionToken', this.sessionToken);
-                this.showMessage('登录成功，正在跳转...', 'success');
-                // 延迟跳转，让用户看到成功消息
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
-            } else {
-                this.showMessage(data.error || '登录失败', 'error');
-            }
-        } catch (error) {
-            console.error('Phone login failed:', error);
-            this.showMessage('登录失败，请重试', 'error');
-        } finally {
-            this.hideLoading();
-        }
-    }
-    async sendVerificationCode() {
-        const phone = document.getElementById('phone').value;
-        if (!phone) {
-            this.showMessage('请输入手机号', 'error');
-            return;
-        }
-        const btn = document.getElementById('sendCodeBtn');
-        btn.disabled = true;
-        // 倒计时
-        let countdown = 60;
-        const timer = setInterval(() => {
-            btn.textContent = `${countdown}秒后重试`;
-            countdown--;
-            if (countdown < 0) {
-                clearInterval(timer);
-                btn.disabled = false;
-                btn.textContent = '发送验证码';
-            }
-        }, 1000);
-        // 这里应该调用发送短信验证码的API
-        // 暂时模拟成功
-        this.showMessage('验证码已发送（测试环境请使用：123456）', 'success');
-    }
-    generateWechatQR() {
-        // 这里应该生成微信登录二维码
-        // 暂时显示提示
-        this.showMessage('微信登录功能开发中', 'error');
-    }
-    async logout() {
-        if (!this.sessionToken) return;
-        try {
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.sessionToken}`
+                if (method === 'wechat') {
+                    this.showWechatPayQR(data.qrCode);
+                } else if (method === 'alipay') {
+                    window.open(data.payUrl, '_blank');
                 }
-            });
+                this.pollPaymentStatus(data.orderId);
+            } else {
+                this.showMessage(data.message || '创建支付订单失败', 'error');
+            }
         } catch (error) {
-            console.error('Logout failed:', error);
+            console.error('Payment error:', error);
+            this.showMessage('网络错误，请重试', 'error');
         }
-        localStorage.removeItem('sessionToken');
-        this.sessionToken = null;
-        this.showLoginForm();
-        this.showMessage('已退出登录', 'success');
     }
-    async saveApiKey() {
-        const apiKey = document.getElementById('apiKey').value;
+
+    showWechatPayQR(qrCode) {
+        const paymentContent = document.querySelector('.payment-content');
+        paymentContent.innerHTML = `
+            <h3>微信支付</h3>
+            <div class="payment-qr">
+                <img src="${qrCode}" alt="微信支付二维码">
+                <p>请使用微信扫描二维码完成支付</p>
+                <div class="payment-status">等待支付...</div>
+            </div>
+        `;
+    }
+
+    async pollPaymentStatus(orderId) {
+        const maxAttempts = 60; // 5分钟
+        let attempts = 0;
+
+        const poll = async () => {
+            if (attempts >= maxAttempts) {
+                this.showMessage('支付超时，请重试', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/payment/status/${orderId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${this.sessionToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'paid') {
+                    this.showMessage('支付成功！正在升级账户...', 'success');
+                    this.hidePaymentModal();
+                    // 刷新用户信息
+                    setTimeout(() => {
+                        this.verifySession();
+                    }, 2000);
+                    return;
+                }
+
+                attempts++;
+                setTimeout(poll, 5000);
+            } catch (error) {
+                console.error('Poll payment status error:', error);
+                attempts++;
+                setTimeout(poll, 5000);
+            }
+        };
+
+        poll();
+    }
+
+    saveApiKey() {
+        const apiKey = document.getElementById('userApiKey').value.trim();
         if (!apiKey) {
             this.showMessage('请输入API Key', 'error');
             return;
         }
-        this.showLoading();
-        try {
-            const response = await fetch('/api/user/api-key', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.sessionToken}`
-                },
-                body: JSON.stringify({ apiKey })
-            });
-            const data = await response.json();
-            if (data.success) {
-                this.hideApiKeyModal();
-                this.showMessage('API Key 保存成功', 'success');
-                // 刷新用户信息
-                this.checkLoginStatus();
-            } else {
-                this.showMessage(data.error || 'API Key 保存失败', 'error');
-            }
-        } catch (error) {
-            console.error('Save API key failed:', error);
-            this.showMessage('保存失败，请重试', 'error');
-        } finally {
-            this.hideLoading();
-        }
+
+        localStorage.setItem('gemini_api_key', apiKey);
+        this.showMessage('API Key已保存', 'success');
+        this.hideApiKeyModal();
     }
-    async handlePayment(method) {
-        this.showLoading();
-        try {
-            const response = await fetch('/api/payment/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.sessionToken}`
-                },
-                body: JSON.stringify({
-                    paymentMethod: method,
-                    amount: 20.00
-                })
-            });
-            const data = await response.json();
-            if (data.success) {
-                this.hidePaymentModal();
-                this.showMessage(`${method === 'wechat' ? '微信' : '支付宝'}支付订单已创建`, 'success');
-                // 这里应该跳转到支付页面或显示支付二维码
-            } else {
-                this.showMessage(data.error || '创建支付订单失败', 'error');
-            }
-        } catch (error) {
-            console.error('Create payment failed:', error);
-            this.showMessage('创建支付订单失败，请重试', 'error');
-        } finally {
-            this.hideLoading();
-        }
+
+    logout() {
+        localStorage.removeItem('sessionToken');
+        document.cookie = 'sessionToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        window.location.reload();
     }
-    showLoginForm() {
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('userInfo').style.display = 'none';
-    }
-    showUserInfo(user) {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('userInfo').style.display = 'block';
-        // 更新用户信息显示
-        document.getElementById('userName').textContent = user.username || '用户';
-        document.getElementById('userType').textContent = user.user_type === 'premium' ? '付费用户' : '免费用户';
-        if (user.avatar_url) {
-            document.getElementById('userAvatar').src = user.avatar_url;
-        } else {
-            document.getElementById('userAvatar').src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwIDIwQzI0LjQxODMgMjAgMjggMTYuNDE4MyAyOCAxMkMyOCA3LjU4MTcyIDI0LjQxODMgNCAyMCA0QzE1LjU4MTcgNCA0IDcuNTgxNzIgNCAxMkM0IDE2LjQxODMgMTUuNTgxNyAyMCAyMCAyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMCAyNEMxMi4yNjggMjQgNiAzMC4yNjggNiAzOFY0MEgzNFYzOEMzNCAzMC4yNjggMjcuNzMyIDI0IDIwIDI0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cjwvc3ZnPgo=';
-        }
-        if (user.premium_expires_at) {
-            const expiryDate = new Date(user.premium_expires_at);
-            document.getElementById('userExpiry').textContent = `到期时间：${expiryDate.toLocaleDateString()}`;
-        } else {
-            document.getElementById('userExpiry').textContent = '';
-        }
-        // 根据用户类型显示/隐藏升级按钮
-        const upgradeBtn = document.getElementById('upgradeBtn');
-        if (user.user_type === 'premium') {
-            upgradeBtn.style.display = 'none';
-        } else {
-            upgradeBtn.style.display = 'block';
-        }
-    }
-    showPaymentModal() {
-        document.getElementById('paymentModal').style.display = 'block';
-    }
-    hidePaymentModal() {
-        document.getElementById('paymentModal').style.display = 'none';
-    }
-    showApiKeyModal() {
-        document.getElementById('apiKeyModal').style.display = 'block';
-    }
-    hideApiKeyModal() {
-        document.getElementById('apiKeyModal').style.display = 'none';
-        document.getElementById('apiKeyForm').reset();
-    }
-    showLoading() {
-        document.getElementById('loading').style.display = 'flex';
-    }
-    hideLoading() {
-        document.getElementById('loading').style.display = 'none';
-    }
-    showMessage(text, type = 'info') {
-        const messageEl = document.getElementById('message');
-        const messageText = document.getElementById('messageText');
-        messageText.textContent = text;
+
+    showMessage(message, type) {
+        // 创建消息元素
+        const messageEl = document.createElement('div');
         messageEl.className = `message ${type}`;
-        messageEl.style.display = 'flex';
-        // 3秒后自动隐藏
+        messageEl.textContent = message;
+
+        // 添加到页面
+        document.body.appendChild(messageEl);
+
+        // 3秒后自动移除
         setTimeout(() => {
-            this.hideMessage();
+            messageEl.remove();
         }, 3000);
     }
-    hideMessage() {
-        document.getElementById('message').style.display = 'none';
-    }
 }
+
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
     new LoginManager();
 });
- 
