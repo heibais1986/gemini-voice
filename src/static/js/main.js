@@ -47,39 +47,49 @@ class UserAuthManager {
     }
 
     async checkAuth() {
+        console.log('🔐 checkAuth() 开始执行...');
+        console.log('📍 当前路径:', window.location.pathname);
+        console.log('🎫 当前sessionToken:', this.sessionToken ? '存在' : '不存在');
+
         // 如果后端已经重定向到登录页，说明认证失败，不需要前端再次检查
         if (window.location.pathname === '/login.html') {
+            console.log('📄 当前在登录页，跳过认证检查');
             return false;
         }
 
         // 如果有sessionToken，尝试获取用户信息
         if (this.sessionToken) {
+            console.log('🎫 有sessionToken，验证有效性...');
             try {
                 const response = await fetch('/api/user/profile', {
                     headers: {
                         'Authorization': `Bearer ${this.sessionToken}`
                     }
                 });
+                console.log('📡 API响应状态:', response.status);
                 if (response.ok) {
                     const data = await response.json();
                     this.currentUser = data.user;
                     this.isAuthenticated = true;
                     this.updateUserUI();
                     this.hideLoginOverlay();
+                    console.log('✅ 认证成功，用户:', data.user.username);
                     return true;
                 } else {
                     // token无效，清除并显示登录提示
+                    console.log('❌ token无效，清除认证信息');
                     this.clearSessionToken();
                     this.showLoginOverlay();
                     return false;
                 }
             } catch (error) {
-                console.error('Auth check failed:', error);
+                console.error('❌ 认证检查失败:', error);
                 this.showLoginOverlay();
                 return false;
             }
         } else {
             // 没有token，显示登录提示
+            console.log('❌ 没有sessionToken，显示登录遮罩');
             this.showLoginOverlay();
             return false;
         }
@@ -91,11 +101,25 @@ class UserAuthManager {
     }
 
     showLoginOverlay() {
-        document.getElementById('login-overlay').style.display = 'flex';
+        console.log('🔓 尝试显示登录遮罩...');
+        const overlay = document.getElementById('login-overlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+            console.log('✅ 登录遮罩已显示');
+        } else {
+            console.error('❌ 找不到login-overlay元素');
+        }
     }
 
     hideLoginOverlay() {
-        document.getElementById('login-overlay').style.display = 'none';
+        console.log('🔒 隐藏登录遮罩...');
+        const overlay = document.getElementById('login-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+            console.log('✅ 登录遮罩已隐藏');
+        } else {
+            console.error('❌ 找不到login-overlay元素');
+        }
     }
 
     updateUserUI() {
@@ -793,13 +817,24 @@ screenContainer.querySelector('.close-button').addEventListener('click', () => {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 页面初始化开始...');
+
     // 检查服务器是否要求认证
     const authRequired = document.querySelector('meta[name="auth-required"]');
+    console.log('🔍 检查auth-required meta标签:', authRequired);
+    if (authRequired) {
+        console.log('📋 meta标签内容:', authRequired.content);
+    }
+
     if (authRequired && authRequired.content === 'true') {
+        console.log('✅ 发现auth-required=true，显示登录遮罩');
         userAuth.showLoginOverlay();
+    } else {
+        console.log('❌ 未发现auth-required=true，继续认证检查');
     }
 
     // 检查用户认证状态
+    console.log('🔐 开始用户认证检查...');
     await userAuth.checkAuth();
 
     // 初始状态设置
@@ -808,4 +843,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     screenButton.disabled = true;
 
     logSystem('应用已初始化，请连接到 Gemini Live API');
+    console.log('✅ 页面初始化完成');
 });

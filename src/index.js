@@ -81,15 +81,21 @@ async function handlePageRouting(request, env) {
  */
 async function checkUserAuthFromCookie(request, env) {
   try {
+    console.log('🔐 checkUserAuthFromCookie() 开始执行...');
     const authService = new AuthService(env.DB, env);
     const cookieHeader = request.headers.get('Cookie');
+    console.log('🍪 Cookie头部:', cookieHeader ? '存在' : '不存在');
     const sessionToken = cookieHeader ? parseCookies(cookieHeader).sessionToken : null;
+    console.log('🎫 解析到的sessionToken:', sessionToken ? '存在' : '不存在');
 
     if (!sessionToken) {
+      console.log('❌ 没有sessionToken，返回未认证状态');
       return { isAuthenticated: false, user: null };
     }
 
+    console.log('🔍 验证sessionToken有效性...');
     const sessionResult = await authService.validateSession(sessionToken);
+    console.log('✅ 验证结果:', sessionResult.valid ? '有效' : '无效');
     return {
       isAuthenticated: sessionResult.valid,
       user: sessionResult.user,
@@ -139,17 +145,35 @@ async function handleLogoutPage(request, env) {
  */
 async function serveIndexPage(isAuthenticated) {
   try {
+    console.log('🏠 serveIndexPage() 被调用，认证状态:', isAuthenticated);
     let fileContent = getStaticFileContent('index.html');
     if (fileContent === null) {
+      console.error('❌ index.html 文件未找到');
       return new Response('File not found', { status: 404 });
     }
 
     // 如果用户未认证，在HTML中添加meta标签
     if (!isAuthenticated) {
+      console.log('🔓 用户未认证，注入auth-required meta标签');
+      const originalContent = fileContent;
       fileContent = fileContent.replace(
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <meta name="auth-required" content="true">'
       );
+
+      // 验证替换是否成功
+      if (fileContent === originalContent) {
+        console.warn('⚠️ meta标签注入可能失败，viewport meta标签未找到');
+        // 尝试其他方式注入
+        fileContent = fileContent.replace(
+          '<head>',
+          '<head>\n    <meta name="auth-required" content="true">'
+        );
+      } else {
+        console.log('✅ meta标签注入成功');
+      }
+    } else {
+      console.log('🔒 用户已认证，返回正常页面');
     }
 
     return new Response(fileContent, {
