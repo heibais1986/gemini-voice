@@ -1,5 +1,4 @@
 // 导入用户系统和静态文件处理模块
-import { UserRoutes } from './user-system/routes.js';
 import { AuthService } from './user-system/auth.js';
 import { getStaticFileContent, getContentType } from './static-files.js';
 
@@ -14,30 +13,24 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // 1. 处理用户系统API请求 (例如 /api/login, /api/register)
-    if (url.pathname.startsWith('/api/')) {
-      const userRoutes = new UserRoutes(env.DB, env);
-      return await userRoutes.handleRequest(request, url.pathname);
-    }
-
-    // 2. 处理 WebSocket 连接升级请求
+    // 1. 处理 WebSocket 连接升级请求
     if (request.headers.get('Upgrade') === 'websocket') {
       return handleWebSocket(request, env);
     }
 
-    // 3. 处理需要认证的后端API请求 (例如 /chat/completions)
+    // 2. 处理需要认证的后端API请求 (例如 /chat/completions)
     if (url.pathname.endsWith("/chat/completions") ||
         url.pathname.endsWith("/embeddings") ||
         url.pathname.endsWith("/models")) {
       return handleAPIRequest(request, env);
     }
 
-    // 4. 处理用户系统API请求 - 内联处理确保生产环境稳定
+    // 3. 处理用户系统API请求 - 内联处理确保生产环境稳定
     if (url.pathname.startsWith('/api/auth/') || url.pathname.startsWith('/api/user/') || url.pathname.startsWith('/api/payment/')) {
       return await handleUserSystemAPI(request, env, url.pathname);
     }
 
-    // 5. 处理页面路由和静态文件请求
+    // 4. 处理页面路由和静态文件请求
     return await handlePageRouting(request, env);
   },
 };
