@@ -114,10 +114,12 @@ async function handleUserSystemAPI(req, res, pathname) {
       req.on('data', chunk => body += chunk.toString());
       req.on('end', () => {
         try {
-          const { phone, verificationCode } = JSON.parse(body);
-          log(`收到登录请求: ${phone}, 验证码: ${verificationCode}`, 'api');
+          const { phone, code, verificationCode } = JSON.parse(body);
+          // 支持两种字段名：code 和 verificationCode
+          const inputCode = code || verificationCode;
+          log(`收到登录请求: ${phone}, 验证码: ${inputCode}`, 'api');
 
-          if (!phone || !verificationCode) {
+          if (!phone || !inputCode) {
             log('登录失败: 手机号或验证码为空', 'error');
             res.writeHead(400, corsHeaders);
             res.end(JSON.stringify({
@@ -154,11 +156,11 @@ async function handleUserSystemAPI(req, res, pathname) {
           // 支持测试验证码和万能验证码
           const testPhones = ['13800138000', '13800138001', '13800138002', '18888888888', '19999999999'];
           const universalCodes = ['123456', '000000', '888888'];
-          const isValidCode = stored.code === verificationCode ||
-                             (testPhones.includes(phone) && universalCodes.includes(verificationCode));
+          const isValidCode = stored.code === inputCode ||
+                             (testPhones.includes(phone) && universalCodes.includes(inputCode));
 
           if (!isValidCode) {
-            log(`登录失败: 验证码错误 - ${phone}:${verificationCode} (期望:${stored.code})`, 'error');
+            log(`登录失败: 验证码错误 - ${phone}:${inputCode} (期望:${stored.code})`, 'error');
             res.writeHead(400, corsHeaders);
             res.end(JSON.stringify({
               success: false,

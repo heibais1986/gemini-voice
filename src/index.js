@@ -494,9 +494,11 @@ async function handleUserSystemAPI(request, env, pathname) {
 
     // 手机号登录API
     if (pathname === '/api/auth/phone-login' && request.method === 'POST') {
-      const { phone, verificationCode } = await request.json();
+      const { phone, code, verificationCode } = await request.json();
+      // 支持两种字段名：code 和 verificationCode
+      const inputCode = code || verificationCode;
 
-      if (!phone || !verificationCode) {
+      if (!phone || !inputCode) {
         return new Response(JSON.stringify({
           success: false,
           message: '手机号和验证码不能为空'
@@ -524,8 +526,8 @@ async function handleUserSystemAPI(request, env, pathname) {
       // 支持测试验证码和万能验证码
       const testPhones = ['13800138000', '13800138001', '13800138002', '18888888888', '19999999999'];
       const universalCodes = ['123456', '000000', '888888'];
-      const isValidCode = stored.code === verificationCode ||
-                         (testPhones.includes(phone) && universalCodes.includes(verificationCode));
+      const isValidCode = stored.code === inputCode ||
+                         (testPhones.includes(phone) && universalCodes.includes(inputCode));
 
       if (!isValidCode) {
         return new Response(JSON.stringify({
