@@ -493,7 +493,7 @@ async function handleUserSystemAPI(request, env, pathname) {
     }
 
     // 手机号登录API
-    if (pathname === '/api/auth/login/phone' && request.method === 'POST') {
+    if (pathname === '/api/auth/phone-login' && request.method === 'POST') {
       const { phone, verificationCode } = await request.json();
 
       if (!phone || !verificationCode) {
