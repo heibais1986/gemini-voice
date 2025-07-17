@@ -8,6 +8,7 @@ import { getClientIP, getUserAgent, validatePhone, RateLimiter } from './utils.j
 // 创建限流器
 const loginLimiter = new RateLimiter(5, 60000); // 每分钟最多5次登录尝试
 const apiLimiter = new RateLimiter(100, 60000);  // 每分钟最多100次API调用
+const codeLimiter = new RateLimiter(3, 60000);   // 每分钟最多3次验证码发送
 export class UserRoutes {
   constructor(db, env) {
     this.authService = new AuthService(db, env);
@@ -32,6 +33,9 @@ export class UserRoutes {
     }
     try {
       switch (true) {
+        // 发送验证码
+        case pathname === '/api/auth/send-code' && method === 'POST':
+          return await this.handleSendCode(request);
         // 手机号登录
         case pathname === '/api/auth/login/phone' && method === 'POST':
           return await this.handlePhoneLogin(request);
@@ -84,6 +88,60 @@ export class UserRoutes {
       });
     }
   }
+
+  /**
+   * 发送验证码
+   */
+  async handleSendCode(request) {
+    const ipAddress = getClientIP(request);
+
+    // 验证码发送限流 - 每分钟最多3次
+    if (!codeLimiter.isAllowed(ipAddress)) {
+      return this.errorResponse('发送过于频繁，请稍后再试', 429);
+    }
+
+    try {
+      const { phone } = await request.json();
+
+      if (!phone) {
+        return this.errorResponse('手机号不能为空');
+      }
+
+      if (!validatePhone(phone)) {
+        return this.errorResponse('手机号格式不正确');
+      }
+
+      // 生成6位数验证码
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // 存储验证码
+      this.authService.storeVerificationCode(phone, code);
+
+      // 在实际项目中，这里应该调用短信服务发送验证码
+      // 目前为了演示，我们将验证码输出到控制台
+      console.log(`📱 验证码发送到 ${phone}: ${code} (5分钟内有效)`);
+
+      // 在开发环境下，将验证码输出到控制台
+      if (this.env.ENVIRONMENT === 'development') {
+        console.log(`🔐 开发模式 - 验证码: ${code}`);
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: '验证码已发送',
+        // 在开发环境下返回验证码（生产环境不应该返回）
+        ...(this.env.ENVIRONMENT === 'development' && { code })
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } catch (error) {
+      console.error('Send code error:', error);
+      return this.errorResponse('发送验证码失败');
+    }
+  }
+
   /**
    * 手机号登录
    */

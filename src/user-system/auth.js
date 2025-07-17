@@ -5,18 +5,62 @@
  */
 import { Database } from './database.js';
 import { generateSessionToken, generateOrderNo } from './utils.js';
+
+// 简单的内存验证码存储（生产环境应该使用Redis或数据库）
+const verificationCodes = new Map();
+
 export class AuthService {
   constructor(db, env) {
     this.database = new Database(db);
     this.env = env;
+  }
+
+  /**
+   * 存储验证码
+   */
+  storeVerificationCode(phone, code) {
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5分钟过期
+    verificationCodes.set(phone, { code, expiresAt });
+
+    // 清理过期的验证码
+    setTimeout(() => {
+      verificationCodes.delete(phone);
+    }, 5 * 60 * 1000);
+  }
+
+  /**
+   * 验证验证码
+   */
+  verifyPhoneCode(phone, inputCode) {
+    const stored = verificationCodes.get(phone);
+
+    if (!stored) {
+      return { success: false, error: '验证码不存在或已过期' };
+    }
+
+    if (Date.now() > stored.expiresAt) {
+      verificationCodes.delete(phone);
+      return { success: false, error: '验证码已过期' };
+    }
+
+    if (stored.code !== inputCode) {
+      return { success: false, error: '验证码错误' };
+    }
+
+    // 验证成功后删除验证码
+    verificationCodes.delete(phone);
+    return { success: true };
   }
   /**
    * 手机号登录/注册
    */
   async loginWithPhone(phone, verificationCode, ipAddress, userAgent) {
     try {
-      // 这里应该验证短信验证码，暂时跳过
-      // await this.verifyPhoneCode(phone, verificationCode);
+      // 验证短信验证码
+      const codeVerification = this.verifyPhoneCode(phone, verificationCode);
+      if (!codeVerification.success) {
+        return { success: false, error: codeVerification.error };
+      }
       let user = await this.database.getUserByPhone(phone);
       if (!user) {
         // 新用户注册
@@ -201,7 +245,7 @@ export class AuthService {
     try {
       const isPremium = await this.database.isPremiumUser(userId);
       const todayUsage = await this.database.getTodayApiUsage(userId);
-      const maxCalls = isPremium ? 
+      const maxCalls = isPremium ?
         parseInt(await this.database.getConfig('max_daily_api_calls_premium') || '10000') :
         parseInt(await this.database.getConfig('max_daily_api_calls_free') || '100');
       return {
