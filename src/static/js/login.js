@@ -90,7 +90,7 @@ class LoginManager {
     }
 
     async handlePhoneLogin() {
-        const phone = document.getElementById('phone').value;
+        const phone = document.getElementById('phoneInput').value;
         const code = document.getElementById('verificationCode').value;
 
         if (!phone || !code) {
@@ -121,7 +121,7 @@ class LoginManager {
     }
 
     async sendVerificationCode() {
-        const phone = document.getElementById('phone').value;
+        const phone = document.getElementById('phoneInput').value;
         const sendBtn = document.getElementById('sendCodeBtn');
 
         if (!phone) {
@@ -257,13 +257,13 @@ class LoginManager {
     handleLoginSuccess(data) {
         // 保存会话令牌
         localStorage.setItem('sessionToken', data.sessionToken);
-        
+
         // 设置Cookie
         const expires = new Date(data.expiresAt);
         document.cookie = `sessionToken=${encodeURIComponent(data.sessionToken)}; path=/; expires=${expires.toUTCString()}; secure; samesite=strict`;
 
         this.showMessage('登录成功！', 'success');
-        
+
         // 延迟跳转到主页
         setTimeout(() => {
             window.location.href = '/';
@@ -303,23 +303,23 @@ class LoginManager {
     showUserDashboard(user) {
         // 隐藏登录表单
         document.getElementById('loginContainer').style.display = 'none';
-        
+
         // 显示用户仪表板
         const dashboard = document.getElementById('userDashboard');
         dashboard.style.display = 'block';
-        
+
         // 更新用户信息
         document.getElementById('userName').textContent = user.username || '用户';
         document.getElementById('userPhone').textContent = user.phone || '';
         document.getElementById('userType').textContent = user.user_type === 'premium' ? '付费用户' : '免费用户';
         document.getElementById('apiCallsUsed').textContent = user.api_calls_today || 0;
         document.getElementById('apiCallsLimit').textContent = user.user_type === 'premium' ? '1000' : '100';
-        
+
         if (user.premium_expires_at) {
             document.getElementById('premiumExpiry').textContent = new Date(user.premium_expires_at).toLocaleDateString();
             document.getElementById('premiumInfo').style.display = 'block';
         }
-        
+
         // 根据用户类型显示相应按钮
         if (user.user_type === 'free') {
             document.getElementById('upgradeBtn').style.display = 'block';

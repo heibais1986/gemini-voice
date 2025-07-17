@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手机号输入测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #0056b3; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 4px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 手机号输入框测试</h1>
+    
+    <div class="test-section">
+        <h2>问题重现测试</h2>
+        <p>测试修复前的ID冲突问题</p>
+        
+        <!-- 模拟原来的问题结构 -->
+        <div id="phone" style="display: none;">这是一个div，ID为phone</div>
+        
+        <div class="form-group">
+            <label for="phoneInput">手机号</label>
+            <input type="tel" id="phoneInput" placeholder="请输入手机号" value="13800138000">
+        </div>
+        
+        <button class="btn" onclick="testPhoneInput()">测试获取手机号</button>
+        <button class="btn" onclick="testOldMethod()">测试旧方法(ID冲突)</button>
+        
+        <div id="testResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>验证码发送测试</h2>
+        <p>模拟登录页面的验证码发送功能</p>
+        
+        <div class="form-group">
+            <label for="testPhone">手机号</label>
+            <input type="tel" id="testPhone" placeholder="请输入手机号" value="13800138000">
+        </div>
+        
+        <button class="btn" id="sendTestCode" onclick="sendTestCode()">发送验证码</button>
+        
+        <div class="form-group">
+            <label for="testCode">验证码</label>
+            <input type="text" id="testCode" placeholder="请输入验证码" maxlength="6">
+        </div>
+        
+        <button class="btn" onclick="testLogin()">测试登录</button>
+        
+        <div id="sendResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试日志</h2>
+        <div id="log" class="log"></div>
+        <button class="btn" onclick="clearLog()">清空日志</button>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function showResult(elementId, message, type = 'info') {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        function testPhoneInput() {
+            log('=== 测试新方法：getElementById("phoneInput") ===');
+            
+            const phoneInput = document.getElementById('phoneInput');
+            if (phoneInput) {
+                const value = phoneInput.value;
+                log(`✅ 成功获取到输入框元素`);
+                log(`📱 手机号值: "${value}"`);
+                log(`🔍 元素类型: ${phoneInput.tagName}`);
+                
+                if (value) {
+                    showResult('testResult', `✅ 成功获取手机号: ${value}`, 'success');
+                } else {
+                    showResult('testResult', '⚠️ 手机号为空，请输入手机号', 'error');
+                }
+            } else {
+                log(`❌ 无法找到phoneInput元素`);
+                showResult('testResult', '❌ 无法找到phoneInput元素', 'error');
+            }
+        }
+
+        function testOldMethod() {
+            log('=== 测试旧方法：getElementById("phone") ===');
+            
+            const phoneElement = document.getElementById('phone');
+            if (phoneElement) {
+                const value = phoneElement.value;
+                log(`⚠️ 获取到元素，但类型错误`);
+                log(`🔍 元素类型: ${phoneElement.tagName}`);
+                log(`📱 尝试获取value: "${value}"`);
+                log(`❌ 这就是问题所在：获取到的是div而不是input`);
+                
+                showResult('testResult', `❌ ID冲突问题：获取到${phoneElement.tagName}元素，value为undefined`, 'error');
+            } else {
+                log(`❌ 无法找到phone元素`);
+                showResult('testResult', '❌ 无法找到phone元素', 'error');
+            }
+        }
+
+        async function sendTestCode() {
+            log('=== 测试发送验证码 ===');
+            
+            const phone = document.getElementById('testPhone').value;
+            const sendBtn = document.getElementById('sendTestCode');
+            
+            if (!phone) {
+                log('❌ 手机号为空');
+                showResult('sendResult', '❌ 请输入手机号', 'error');
+                return;
+            }
+            
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                log('❌ 手机号格式不正确');
+                showResult('sendResult', '❌ 请输入正确的手机号格式', 'error');
+                return;
+            }
+            
+            log(`📱 准备发送验证码到: ${phone}`);
+            sendBtn.disabled = true;
+            sendBtn.textContent = '发送中...';
+            
+            try {
+                // 模拟API调用
+                const response = await fetch('/api/auth/send-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ 验证码发送成功`);
+                    log(`💡 提示: ${data.hint || '验证码已发送'}`);
+                    if (data.code) {
+                        log(`🔐 开发模式验证码: ${data.code}`);
+                        document.getElementById('testCode').value = data.code;
+                    }
+                    showResult('sendResult', `✅ ${data.message}${data.hint ? '<br>💡 ' + data.hint : ''}`, 'success');
+                    startCountdown(sendBtn);
+                } else {
+                    log(`❌ 发送失败: ${data.message}`);
+                    showResult('sendResult', `❌ ${data.message}`, 'error');
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = '发送验证码';
+                }
+            } catch (error) {
+                log(`❌ 网络错误: ${error.message}`);
+                showResult('sendResult', '❌ 网络错误，请检查服务器是否启动', 'error');
+                sendBtn.disabled = false;
+                sendBtn.textContent = '发送验证码';
+            }
+        }
+
+        function startCountdown(button) {
+            let countdown = 60;
+            const timer = setInterval(() => {
+                button.textContent = `${countdown}秒后重发`;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(timer);
+                    button.disabled = false;
+                    button.textContent = '发送验证码';
+                }
+            }, 1000);
+        }
+
+        async function testLogin() {
+            log('=== 测试登录 ===');
+            
+            const phone = document.getElementById('testPhone').value;
+            const code = document.getElementById('testCode').value;
+            
+            if (!phone || !code) {
+                log('❌ 手机号或验证码为空');
+                showResult('sendResult', '❌ 请输入手机号和验证码', 'error');
+                return;
+            }
+            
+            log(`📱 手机号: ${phone}`);
+            log(`🔐 验证码: ${code}`);
+            
+            try {
+                const response = await fetch('/api/auth/login/phone', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone, verificationCode: code })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ 登录成功`);
+                    log(`👤 用户信息: ${JSON.stringify(data.user)}`);
+                    showResult('sendResult', '✅ 登录成功！', 'success');
+                } else {
+                    log(`❌ 登录失败: ${data.message}`);
+                    showResult('sendResult', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ 网络错误: ${error.message}`);
+                showResult('sendResult', '❌ 网络错误，请检查服务器是否启动', 'error');
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // 页面加载时的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            log('页面加载完成，开始测试');
+            log('这个页面用于测试手机号输入框的ID冲突问题');
+            log('修复前：ID冲突导致获取到div而不是input');
+            log('修复后：使用phoneInput ID避免冲突');
+        });
+    </script>
+</body>
+</html>
