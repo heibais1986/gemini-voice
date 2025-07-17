@@ -80,9 +80,9 @@
 
     "@cloudflare/vitest-pool-workers": "^0.5.2",
 
-    "wrangler": "^3.60.3",
+    "vitest": "^2.1.8",
 
-    "vitest": "^2.1.8"
+    "wrangler": "^4.24.4"
 
   },
 
