@@ -32,7 +32,13 @@ export default {
       return handleAPIRequest(request, env);
     }
 
-    // 4. 处理页面路由和静态文件请求
+    // 4. 处理用户系统API请求
+    if (url.pathname.startsWith('/api/auth/') || url.pathname.startsWith('/api/user/') || url.pathname.startsWith('/api/payment/')) {
+      const userRoutes = new UserRoutes(env.DB, env);
+      return await userRoutes.handleRequest(request, url.pathname);
+    }
+
+    // 5. 处理页面路由和静态文件请求
     return await handlePageRouting(request, env);
   },
 };
