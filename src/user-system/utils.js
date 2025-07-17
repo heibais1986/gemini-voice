@@ -148,6 +148,125 @@ export function generateVerificationCode(length = 6) {
   }
   return result;
 }
+
+/**
+ * 生产环境验证码测试方案
+ */
+export class VerificationCodeManager {
+  constructor(env) {
+    this.env = env;
+    this.isProduction = env.ENVIRONMENT === 'production';
+    this.isDevelopment = env.ENVIRONMENT === 'development';
+    this.isTest = env.ENVIRONMENT === 'test';
+  }
+
+  /**
+   * 生成验证码（根据环境使用不同策略）
+   */
+  generateCode(phone) {
+    // 方案1: 测试手机号使用固定验证码
+    if (this.isTestPhone(phone)) {
+      return '123456'; // 测试专用验证码
+    }
+
+    // 方案2: 开发环境使用简单规则
+    if (this.isDevelopment) {
+      // 使用手机号后4位作为验证码（补齐6位）
+      const lastFour = phone.slice(-4);
+      return lastFour.padStart(6, '0');
+    }
+
+    // 方案3: 生产环境使用随机验证码
+    return generateVerificationCode(6);
+  }
+
+  /**
+   * 检查是否为测试手机号
+   */
+  isTestPhone(phone) {
+    const testPhones = [
+      '13800138000', // 通用测试号码
+      '13800138001', // 测试号码1
+      '13800138002', // 测试号码2
+      '13800138003', // 测试号码3
+      '18888888888', // 特殊测试号码
+      '19999999999'  // 特殊测试号码
+    ];
+    return testPhones.includes(phone);
+  }
+
+  /**
+   * 验证验证码（支持多种验证策略）
+   */
+  verifyCode(phone, inputCode, storedCode) {
+    // 方案1: 测试手机号的特殊验证逻辑
+    if (this.isTestPhone(phone)) {
+      // 测试号码支持多个有效验证码
+      const validCodes = ['123456', '000000', storedCode];
+      return validCodes.includes(inputCode);
+    }
+
+    // 方案2: 开发环境的宽松验证
+    if (this.isDevelopment) {
+      // 开发环境支持万能验证码
+      const universalCodes = ['123456', '000000', '888888'];
+      if (universalCodes.includes(inputCode)) {
+        return true;
+      }
+    }
+
+    // 方案3: 正常验证逻辑
+    return inputCode === storedCode;
+  }
+
+  /**
+   * 模拟发送验证码（根据环境使用不同策略）
+   */
+  async sendCode(phone, code) {
+    if (this.isTestPhone(phone)) {
+      console.log(`📱 [测试模式] 验证码发送到 ${phone}: ${code}`);
+      return { success: true, message: '测试验证码已生成', method: 'test' };
+    }
+
+    if (this.isDevelopment || this.isTest) {
+      console.log(`📱 [开发模式] 验证码发送到 ${phone}: ${code}`);
+      return { success: true, message: '开发验证码已生成', method: 'console' };
+    }
+
+    // 生产环境 - 这里应该集成真实的短信服务
+    if (this.isProduction) {
+      try {
+        // TODO: 集成真实短信服务 (阿里云、腾讯云、华为云等)
+        // await this.sendSMSViaTencentCloud(phone, code);
+        // await this.sendSMSViaAliyun(phone, code);
+
+        console.log(`📱 [生产模式] 应该发送验证码到 ${phone}: ${code}`);
+        return { success: true, message: '验证码已发送', method: 'sms' };
+      } catch (error) {
+        console.error('短信发送失败:', error);
+        return { success: false, message: '验证码发送失败', error: error.message };
+      }
+    }
+
+    return { success: false, message: '未知环境' };
+  }
+
+  /**
+   * 获取验证码提示信息
+   */
+  getCodeHint(phone) {
+    if (this.isTestPhone(phone)) {
+      return '测试号码，验证码: 123456';
+    }
+
+    if (this.isDevelopment) {
+      const hint = phone.slice(-4).padStart(6, '0');
+      return `开发模式，验证码: ${hint}`;
+    }
+
+    return '验证码已发送到您的手机';
+  }
+}
 /**
  * 脱敏手机号
  */

@@ -4,7 +4,7 @@
  * 处理登录、注册、会话管理等功能
  */
 import { Database } from './database.js';
-import { generateSessionToken, generateOrderNo } from './utils.js';
+import { generateSessionToken, generateOrderNo, VerificationCodeManager } from './utils.js';
 
 // 简单的内存验证码存储（生产环境应该使用Redis或数据库）
 const verificationCodes = new Map();
@@ -13,10 +13,29 @@ export class AuthService {
   constructor(db, env) {
     this.database = new Database(db);
     this.env = env;
+    this.codeManager = new VerificationCodeManager(env);
   }
 
   /**
-   * 存储验证码
+   * 生成并存储验证码
+   */
+  generateAndStoreCode(phone) {
+    // 使用新的验证码管理器生成验证码
+    const code = this.codeManager.generateCode(phone);
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5分钟过期
+
+    verificationCodes.set(phone, { code, expiresAt });
+
+    // 清理过期的验证码
+    setTimeout(() => {
+      verificationCodes.delete(phone);
+    }, 5 * 60 * 1000);
+
+    return code;
+  }
+
+  /**
+   * 存储验证码（兼容旧接口）
    */
   storeVerificationCode(phone, code) {
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5分钟过期
@@ -29,7 +48,7 @@ export class AuthService {
   }
 
   /**
-   * 验证验证码
+   * 验证验证码（增强版）
    */
   verifyPhoneCode(phone, inputCode) {
     const stored = verificationCodes.get(phone);
@@ -43,13 +62,29 @@ export class AuthService {
       return { success: false, error: '验证码已过期' };
     }
 
-    if (stored.code !== inputCode) {
+    // 使用增强的验证逻辑
+    const isValid = this.codeManager.verifyCode(phone, inputCode, stored.code);
+
+    if (!isValid) {
       return { success: false, error: '验证码错误' };
     }
 
     // 验证成功后删除验证码
     verificationCodes.delete(phone);
     return { success: true };
+  }
+
+  /**
+   * 发送验证码
+   */
+  async sendVerificationCode(phone) {
+    const code = this.generateAndStoreCode(phone);
+    const result = await this.codeManager.sendCode(phone, code);
+
+    return {
+      ...result,
+      hint: this.codeManager.getCodeHint(phone)
+    };
   }
   /**
    * 手机号登录/注册

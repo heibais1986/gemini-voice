@@ -111,26 +111,21 @@ export class UserRoutes {
         return this.errorResponse('手机号格式不正确');
       }
 
-      // 生成6位数验证码
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      // 使用新的验证码发送服务
+      const result = await this.authService.sendVerificationCode(phone);
 
-      // 存储验证码
-      this.authService.storeVerificationCode(phone, code);
-
-      // 在实际项目中，这里应该调用短信服务发送验证码
-      // 目前为了演示，我们将验证码输出到控制台
-      console.log(`📱 验证码发送到 ${phone}: ${code} (5分钟内有效)`);
-
-      // 在开发环境下，将验证码输出到控制台
-      if (this.env.ENVIRONMENT === 'development') {
-        console.log(`🔐 开发模式 - 验证码: ${code}`);
+      if (!result.success) {
+        return this.errorResponse(result.message, 500);
       }
 
       return new Response(JSON.stringify({
         success: true,
-        message: '验证码已发送',
+        message: result.message,
+        hint: result.hint,
         // 在开发环境下返回验证码（生产环境不应该返回）
-        ...(this.env.ENVIRONMENT === 'development' && { code })
+        ...(this.env.ENVIRONMENT === 'development' && {
+          code: this.authService.codeManager.generateCode(phone)
+        })
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
