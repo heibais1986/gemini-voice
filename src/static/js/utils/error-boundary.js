@@ -94,5 +94,4 @@ export class ApplicationError extends Error {
             timestamp: this.timestamp,
             stack: this.stack
         };
-    }
-} 
+    } 
