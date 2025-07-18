@@ -9,6 +9,7 @@ class UserAuthManager {
         this.sessionToken = this.getSessionTokenFromCookie() || localStorage.getItem('sessionToken');
         this.currentUser = null;
         this.isAuthenticated = false;
+        this.infoModalShown = false; // 添加弹窗显示标志
     }
 
     // 从Cookie获取会话令牌
@@ -64,6 +65,11 @@ class UserAuthManager {
                     this.isAuthenticated = true;
                     this.updateUserUI();
                     this.hideLoginOverlay();
+                    
+                    // 登录成功后显示信息弹窗
+                    console.log('🎯 准备显示信息弹窗...');
+                    this.showInfoModal();
+                    
                     console.log('✅ 认证成功，用户:', data.user.username);
                     return true;
                 } else {
@@ -140,6 +146,81 @@ class UserAuthManager {
         } else {
             if (userInfo) userInfo.style.display = 'none';
             if (apiKeyInput) apiKeyInput.style.display = 'block';
+        }
+    }
+
+    // 显示信息弹窗
+    showInfoModal() {
+        console.log('🎯 showInfoModal() 被调用');
+        
+        // 检查是否已经设置过"不再显示"
+        const dontShowAgain = localStorage.getItem('dontShowInfoModal');
+        console.log('🔍 localStorage dontShowInfoModal:', dontShowAgain);
+        if (dontShowAgain === 'true') {
+            console.log('❌ 用户已设置不再显示，跳过弹窗');
+            return;
+        }
+
+        // 检查是否已经显示过弹窗（防止重复显示）
+        if (this.infoModalShown) {
+            console.log('❌ 弹窗已显示过，跳过');
+            return;
+        }
+
+        const modal = document.getElementById('info-modal');
+        console.log('🔍 查找弹窗元素:', modal ? '找到' : '未找到');
+        
+        if (modal) {
+            console.log('✅ 显示信息弹窗');
+            modal.style.display = 'flex';
+            this.infoModalShown = true; // 设置标志，防止重复显示
+            
+            // 绑定关闭按钮事件
+            const closeBtn = document.getElementById('close-info-modal');
+            const confirmBtn = document.getElementById('confirm-info-modal');
+            const dontShowCheckbox = document.getElementById('dont-show-again');
+
+            console.log('🔍 查找按钮元素:');
+            console.log('  - closeBtn:', closeBtn ? '找到' : '未找到');
+            console.log('  - confirmBtn:', confirmBtn ? '找到' : '未找到');
+            console.log('  - dontShowCheckbox:', dontShowCheckbox ? '找到' : '未找到');
+
+            if (closeBtn) {
+                closeBtn.onclick = () => {
+                    console.log('🔒 点击关闭按钮');
+                    this.hideInfoModal();
+                };
+            }
+
+            if (confirmBtn) {
+                confirmBtn.onclick = () => {
+                    console.log('🔒 点击确定按钮');
+                    // 检查是否勾选了"不再显示"
+                    if (dontShowCheckbox && dontShowCheckbox.checked) {
+                        localStorage.setItem('dontShowInfoModal', 'true');
+                        console.log('✅ 已设置不再显示');
+                    }
+                    this.hideInfoModal();
+                };
+            }
+
+            // 点击遮罩层关闭弹窗
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    console.log('🔒 点击遮罩层关闭弹窗');
+                    this.hideInfoModal();
+                }
+            };
+        } else {
+            console.error('❌ 找不到info-modal元素');
+        }
+    }
+
+    // 隐藏信息弹窗
+    hideInfoModal() {
+        const modal = document.getElementById('info-modal');
+        if (modal) {
+            modal.style.display = 'none';
         }
     }
 }
