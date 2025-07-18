@@ -21,6 +21,12 @@ class UserAuthManager {
         this.infoModalShown = false; // 添加弹窗显示标志
     }
 
+    fileContent = fileContent.replace(
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <meta name="auth-required" content="true">'
+      );
+      
+    
     // 从Cookie获取会话令牌
     getSessionTokenFromCookie() {
         const cookies = document.cookie.split(';');
@@ -52,6 +58,14 @@ class UserAuthManager {
         console.log('📍 当前路径:', window.location.pathname);
         console.log('🎫 当前sessionToken:', this.sessionToken ? '存在' : '不存在');
 
+        // 首先检查页面是否有auth-required meta标签
+        const authRequiredMeta = document.querySelector('meta[name="auth-required"]');
+        if (authRequiredMeta && authRequiredMeta.getAttribute('content') === 'true') {
+            console.log('🔒 检测到auth-required meta标签，显示登录遮罩');
+            this.showLoginOverlay();
+            return false;
+        }
+        
         // 如果后端已经重定向到登录页，说明认证失败，不需要前端再次检查
         if (window.location.pathname === '/login.html') {
             console.log('📄 当前在登录页，跳过认证检查');

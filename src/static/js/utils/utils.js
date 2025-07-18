@@ -36,3 +36,21 @@ export function base64ToArrayBuffer(base64) {
     }
     return bytes.buffer;
 }
+/**
+ * Converts an ArrayBuffer to a base64 encoded string.
+ * @param {ArrayBuffer} buffer - The ArrayBuffer to convert
+ * @returns {string} Base64 encoded string representation of the buffer
+ */
+export function arrayBufferToBase64(buffer) {
+    try {
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        // Convert each byte to binary string
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    } catch (error) {
+        console.error('Failed to convert array buffer to base64: ' + error.message);
+    }
+}
