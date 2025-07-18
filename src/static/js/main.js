@@ -144,9 +144,62 @@ class UserAuthManager {
             } else {
                 apiKeyInput.style.display = 'block';
             }
+
+            // 登录成功后显示信息弹窗
+            this.showInfoModal();
         } else {
             userInfo.style.display = 'none';
             apiKeyInput.style.display = 'block';
+        }
+    }
+
+    // 显示信息弹窗
+    showInfoModal() {
+        // 检查是否已经设置过"不再显示"
+        const dontShowAgain = localStorage.getItem('dontShowInfoModal');
+        if (dontShowAgain === 'true') {
+            return;
+        }
+
+        const modal = document.getElementById('info-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            
+            // 绑定关闭按钮事件
+            const closeBtn = document.getElementById('close-info-modal');
+            const confirmBtn = document.getElementById('confirm-info-modal');
+            const dontShowCheckbox = document.getElementById('dont-show-again');
+
+            if (closeBtn) {
+                closeBtn.onclick = () => {
+                    this.hideInfoModal();
+                };
+            }
+
+            if (confirmBtn) {
+                confirmBtn.onclick = () => {
+                    // 检查是否勾选了"不再显示"
+                    if (dontShowCheckbox && dontShowCheckbox.checked) {
+                        localStorage.setItem('dontShowInfoModal', 'true');
+                    }
+                    this.hideInfoModal();
+                };
+            }
+
+            // 点击遮罩层关闭弹窗
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    this.hideInfoModal();
+                }
+            };
+        }
+    }
+
+    // 隐藏信息弹窗
+    hideInfoModal() {
+        const modal = document.getElementById('info-modal');
+        if (modal) {
+            modal.style.display = 'none';
         }
     }
 }
