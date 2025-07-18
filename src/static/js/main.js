@@ -235,61 +235,6 @@ class UserAuthManager {
 // 创建用户认证管理器实例
 const userAuth = new UserAuthManager();
 
-// DOM Elements
-const logsContainer = document.getElementById('logs-container');
-const messageInput = document.getElementById('message-input');
-const sendButton = document.getElementById('send-button');
-const micButton = document.getElementById('mic-button');
-const micIcon = document.getElementById('mic-icon');
-const audioVisualizer = document.getElementById('audio-visualizer');
-const connectButton = document.getElementById('connect-button');
-const cameraButton = document.getElementById('camera-button');
-const cameraIcon = document.getElementById('camera-icon');
-const stopVideoButton = document.getElementById('stop-video');
-const screenButton = document.getElementById('screen-button');
-const screenIcon = document.getElementById('screen-icon');
-const screenContainer = document.getElementById('screen-container');
-const screenPreview = document.getElementById('screen-preview');
-const inputAudioVisualizer = document.getElementById('input-audio-visualizer');
-const apiKeyInput = document.getElementById('api-key');
-const voiceSelect = document.getElementById('voice-select');
-const languageSelect = document.getElementById('language-select');
-const fpsInput = document.getElementById('fps-input');
-const configToggle = document.getElementById('config-toggle');
-const configContainer = document.getElementById('config-container');
-const systemInstructionInput = document.getElementById('system-instruction');
-const applyConfigButton = document.getElementById('apply-config');
-const responseTypeSelect = document.getElementById('response-type-select');
-
-// 初始化系统指令
-systemInstructionInput.value = CONFIG.SYSTEM_INSTRUCTION.TEXT;
-
-// 加载保存的值或使用默认值
-const savedApiKey = localStorage.getItem('gemini_api_key');
-const savedVoice = localStorage.getItem('gemini_voice') || CONFIG.DEFAULTS.VOICE;
-const savedLanguage = localStorage.getItem('gemini_language') || CONFIG.DEFAULTS.LANGUAGE;
-const savedFPS = localStorage.getItem('video_fps');
-
-if (savedApiKey) {
-    apiKeyInput.value = savedApiKey;
-}
-
-voiceSelect.value = savedVoice;
-responseTypeSelect.value = localStorage.getItem('response_type') || 'audio';
-
-if (savedFPS) {
-    fpsInput.value = savedFPS;
-}
-
-// 填充语言选择器
-Object.entries(languages).forEach(([code, name]) => {
-    const option = document.createElement('option');
-    option.value = code;
-    option.textContent = name;
-    languageSelect.appendChild(option);
-});
-languageSelect.value = savedLanguage;
-
 // 全局变量
 let client = null;
 let isConnected = false;
@@ -303,12 +248,84 @@ let audioRecorder = null;
 let videoManager = null;
 let screenRecorder = null;
 
-// 检查页面元素是否存在（某些页面可能没有这些元素）
-const goLoginBtn = document.getElementById('go-login');
-if (goLoginBtn) {
-    goLoginBtn.addEventListener('click', () => {
-        window.location.href = '/login.html';
-    });
+// DOM 元素变量
+let logsContainer, messageInput, sendButton, micButton, micIcon, audioVisualizer;
+let connectButton, cameraButton, cameraIcon, stopVideoButton, screenButton, screenIcon;
+let screenContainer, screenPreview, inputAudioVisualizer, apiKeyInput, voiceSelect;
+let languageSelect, fpsInput, configToggle, configContainer, systemInstructionInput;
+let applyConfigButton, responseTypeSelect, goLoginBtn;
+
+// 初始化 DOM 元素
+function initializeDOMElements() {
+    logsContainer = document.getElementById('logs-container');
+    messageInput = document.getElementById('message-input');
+    sendButton = document.getElementById('send-button');
+    micButton = document.getElementById('mic-button');
+    micIcon = document.getElementById('mic-icon');
+    audioVisualizer = document.getElementById('audio-visualizer');
+    connectButton = document.getElementById('connect-button');
+    cameraButton = document.getElementById('camera-button');
+    cameraIcon = document.getElementById('camera-icon');
+    stopVideoButton = document.getElementById('stop-video');
+    screenButton = document.getElementById('screen-button');
+    screenIcon = document.getElementById('screen-icon');
+    screenContainer = document.getElementById('screen-container');
+    screenPreview = document.getElementById('screen-preview');
+    inputAudioVisualizer = document.getElementById('input-audio-visualizer');
+    apiKeyInput = document.getElementById('api-key');
+    voiceSelect = document.getElementById('voice-select');
+    languageSelect = document.getElementById('language-select');
+    fpsInput = document.getElementById('fps-input');
+    configToggle = document.getElementById('config-toggle');
+    configContainer = document.getElementById('config-container');
+    systemInstructionInput = document.getElementById('system-instruction');
+    applyConfigButton = document.getElementById('apply-config');
+    responseTypeSelect = document.getElementById('response-type-select');
+    goLoginBtn = document.getElementById('go-login');
+
+    // 初始化系统指令
+    if (systemInstructionInput) {
+        systemInstructionInput.value = CONFIG.SYSTEM_INSTRUCTION.TEXT;
+    }
+
+    // 加载保存的值或使用默认值
+    const savedApiKey = localStorage.getItem('gemini_api_key');
+    const savedVoice = localStorage.getItem('gemini_voice') || CONFIG.DEFAULTS.VOICE;
+    const savedLanguage = localStorage.getItem('gemini_language') || CONFIG.DEFAULTS.LANGUAGE;
+    const savedFPS = localStorage.getItem('video_fps');
+
+    if (savedApiKey && apiKeyInput) {
+        apiKeyInput.value = savedApiKey;
+    }
+
+    if (voiceSelect) {
+        voiceSelect.value = savedVoice;
+    }
+    if (responseTypeSelect) {
+        responseTypeSelect.value = localStorage.getItem('response_type') || 'audio';
+    }
+
+    if (savedFPS && fpsInput) {
+        fpsInput.value = savedFPS;
+    }
+
+    // 填充语言选择器
+    if (languageSelect) {
+        Object.entries(languages).forEach(([code, name]) => {
+            const option = document.createElement('option');
+            option.value = code;
+            option.textContent = name;
+            languageSelect.appendChild(option);
+        });
+        languageSelect.value = savedLanguage;
+    }
+
+    // 检查页面元素是否存在（某些页面可能没有这些元素）
+    if (goLoginBtn) {
+        goLoginBtn.addEventListener('click', () => {
+            window.location.href = '/login.html';
+        });
+    }
 }
 
 /**
@@ -317,6 +334,8 @@ if (goLoginBtn) {
  * @param {string} type - The type of message ('user', 'ai', 'system').
  */
 function logMessage(message, type = 'system') {
+    if (!logsContainer) return;
+    
     const logEntry = document.createElement('div');
     logEntry.className = `log-entry ${type}`;
 
@@ -366,6 +385,8 @@ function logAI(message) {
  */
 function updateAudioVisualizer(volume, isInput = false) {
     const visualizer = isInput ? inputAudioVisualizer : audioVisualizer;
+    if (!visualizer) return;
+    
     const audioBar = visualizer.querySelector('.audio-bar') || document.createElement('div');
 
     if (!visualizer.contains(audioBar)) {
@@ -469,6 +490,8 @@ async function handleMicToggle() {
  * Updates the microphone icon based on recording state.
  */
 function updateMicIcon() {
+    if (!micIcon || !micButton) return;
+    
     if (isRecording) {
         micIcon.textContent = 'mic_off';
         micButton.classList.add('active');
@@ -499,8 +522,8 @@ async function handleVideoToggle() {
             });
 
             isVideoActive = true;
-            cameraIcon.textContent = 'videocam_off';
-            cameraButton.classList.add('active');
+            if (cameraIcon) cameraIcon.textContent = 'videocam_off';
+            if (cameraButton) cameraButton.classList.add('active');
             Logger.info('Camera started successfully');
             logSystem('Camera started');
 
@@ -533,8 +556,8 @@ function stopVideo() {
         videoManager = null;
     }
     isVideoActive = false;
-    cameraIcon.textContent = 'videocam';
-    cameraButton.classList.remove('active');
+    if (cameraIcon) cameraIcon.textContent = 'videocam';
+    if (cameraButton) cameraButton.classList.remove('active');
     logMessage('Camera stopped', 'system');
 
     // 隐藏视频容器
@@ -561,9 +584,9 @@ async function handleScreenShare() {
             });
 
             isScreenSharing = true;
-            screenIcon.textContent = 'stop_screen_share';
-            screenButton.classList.add('active');
-            screenContainer.style.display = 'block';
+            if (screenIcon) screenIcon.textContent = 'stop_screen_share';
+            if (screenButton) screenButton.classList.add('active');
+            if (screenContainer) screenContainer.style.display = 'block';
             logSystem('Screen sharing started');
         } catch (error) {
             Logger.error('Screen sharing error:', error);
@@ -584,9 +607,9 @@ function stopScreenShare() {
         screenRecorder = null;
     }
     isScreenSharing = false;
-    screenIcon.textContent = 'screen_share';
-    screenButton.classList.remove('active');
-    screenContainer.style.display = 'none';
+    if (screenIcon) screenIcon.textContent = 'screen_share';
+    if (screenButton) screenButton.classList.remove('active');
+    if (screenContainer) screenContainer.style.display = 'none';
     logSystem('Screen sharing stopped');
 }
 
@@ -594,6 +617,11 @@ function stopScreenShare() {
  * Connects to the WebSocket server.
  */
 async function connectToWebsocket() {
+    if (!apiKeyInput) {
+        alert('API Key 输入框未找到');
+        return;
+    }
+    
     const apiKey = apiKeyInput.value.trim();
     if (!apiKey) {
         alert('请输入 Gemini API Key');
@@ -607,21 +635,23 @@ async function connectToWebsocket() {
             url: CONFIG.WEBSOCKET_URL,
             apiKey: apiKey,
             model: CONFIG.MODEL,
-            systemInstruction: systemInstructionInput.value || CONFIG.SYSTEM_INSTRUCTION.TEXT,
-            voice: voiceSelect.value,
-            language: languageSelect.value,
-            responseType: responseTypeSelect.value
+            systemInstruction: (systemInstructionInput ? systemInstructionInput.value : '') || CONFIG.SYSTEM_INSTRUCTION.TEXT,
+            voice: voiceSelect ? voiceSelect.value : CONFIG.DEFAULTS.VOICE,
+            language: languageSelect ? languageSelect.value : CONFIG.DEFAULTS.LANGUAGE,
+            responseType: responseTypeSelect ? responseTypeSelect.value : 'audio'
         });
 
         await client.connect();
 
         client.on('open', () => {
             isConnected = true;
-            connectButton.textContent = '断开连接';
-            connectButton.classList.add('connected');
-            micButton.disabled = false;
-            cameraButton.disabled = false;
-            screenButton.disabled = false;
+            if (connectButton) {
+                connectButton.textContent = '断开连接';
+                connectButton.classList.add('connected');
+            }
+            if (micButton) micButton.disabled = false;
+            if (cameraButton) cameraButton.disabled = false;
+            if (screenButton) screenButton.disabled = false;
             logSystem('已连接到 Gemini Live API');
 
             // 保存API Key
@@ -680,21 +710,23 @@ async function connectToWebsocketWithAuth() {
             url: CONFIG.WEBSOCKET_URL,
             sessionToken: userAuth.sessionToken,
             model: CONFIG.MODEL,
-            systemInstruction: systemInstructionInput.value || CONFIG.SYSTEM_INSTRUCTION.TEXT,
-            voice: voiceSelect.value,
-            language: languageSelect.value,
-            responseType: responseTypeSelect.value
+            systemInstruction: (systemInstructionInput ? systemInstructionInput.value : '') || CONFIG.SYSTEM_INSTRUCTION.TEXT,
+            voice: voiceSelect ? voiceSelect.value : CONFIG.DEFAULTS.VOICE,
+            language: languageSelect ? languageSelect.value : CONFIG.DEFAULTS.LANGUAGE,
+            responseType: responseTypeSelect ? responseTypeSelect.value : 'audio'
         });
 
         await client.connect();
 
         client.on('open', () => {
             isConnected = true;
-            connectButton.textContent = '断开连接';
-            connectButton.classList.add('connected');
-            micButton.disabled = false;
-            cameraButton.disabled = false;
-            screenButton.disabled = false;
+            if (connectButton) {
+                connectButton.textContent = '断开连接';
+                connectButton.classList.add('connected');
+            }
+            if (micButton) micButton.disabled = false;
+            if (cameraButton) cameraButton.disabled = false;
+            if (screenButton) screenButton.disabled = false;
             logSystem('已连接到 Gemini Live API');
         });
 
@@ -741,11 +773,13 @@ function disconnectFromWebsocket() {
     }
 
     isConnected = false;
-    connectButton.textContent = '连接';
-    connectButton.classList.remove('connected');
-    micButton.disabled = true;
-    cameraButton.disabled = true;
-    screenButton.disabled = true;
+    if (connectButton) {
+        connectButton.textContent = '连接';
+        connectButton.classList.remove('connected');
+    }
+    if (micButton) micButton.disabled = true;
+    if (cameraButton) cameraButton.disabled = true;
+    if (screenButton) screenButton.disabled = true;
 
     // 停止所有活动
     if (isRecording) {
@@ -815,6 +849,8 @@ async function playAudioResponse(base64Data) {
  * Handles sending a text message.
  */
 function handleSendMessage() {
+    if (!messageInput) return;
+    
     const message = messageInput.value.trim();
     if (!message || !isConnected) return;
 
@@ -831,6 +867,8 @@ function handleSendMessage() {
  * Applies configuration changes.
  */
 function applyConfig() {
+    if (!voiceSelect || !languageSelect || !responseTypeSelect || !systemInstructionInput) return;
+    
     const voice = voiceSelect.value;
     const language = languageSelect.value;
     const responseType = responseTypeSelect.value;
@@ -857,48 +895,81 @@ function applyConfig() {
  * Toggles the configuration panel.
  */
 function toggleConfig() {
+    if (!configContainer) return;
+    
     const isVisible = configContainer.style.display === 'block';
     configContainer.style.display = isVisible ? 'none' : 'block';
 }
 
-// Event Listeners
-messageInput.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        handleSendMessage();
+// 绑定事件监听器
+function bindEventListeners() {
+    if (messageInput) {
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                handleSendMessage();
+            }
+        });
     }
-});
 
-sendButton.addEventListener('click', handleSendMessage);
-micButton.addEventListener('click', handleMicToggle);
-cameraButton.addEventListener('click', handleVideoToggle);
-stopVideoButton.addEventListener('click', stopVideo);
-screenButton.addEventListener('click', handleScreenShare);
-configToggle.addEventListener('click', toggleConfig);
-applyConfigButton.addEventListener('click', applyConfig);
+    if (sendButton) {
+        sendButton.addEventListener('click', handleSendMessage);
+    }
+    if (micButton) {
+        micButton.addEventListener('click', handleMicToggle);
+    }
+    if (cameraButton) {
+        cameraButton.addEventListener('click', handleVideoToggle);
+    }
+    if (stopVideoButton) {
+        stopVideoButton.addEventListener('click', stopVideo);
+    }
+    if (screenButton) {
+        screenButton.addEventListener('click', handleScreenShare);
+    }
+    if (configToggle) {
+        configToggle.addEventListener('click', toggleConfig);
+    }
+    if (applyConfigButton) {
+        applyConfigButton.addEventListener('click', applyConfig);
+    }
 
-// 连接按钮事件监听器
-connectButton.addEventListener('click', () => {
-    if (isConnected) {
-        disconnectFromWebsocket();
-    } else {
-        // 根据用户认证状态选择连接方式
-        if (userAuth.isAuthenticated) {
-            connectToWebsocketWithAuth();
-        } else {
-            connectToWebsocket();
+    // 连接按钮事件监听器
+    if (connectButton) {
+        connectButton.addEventListener('click', () => {
+            if (isConnected) {
+                disconnectFromWebsocket();
+            } else {
+                // 根据用户认证状态选择连接方式
+                if (userAuth.isAuthenticated) {
+                    connectToWebsocketWithAuth();
+                } else {
+                    connectToWebsocket();
+                }
+            }
+        });
+    }
+
+    // 屏幕容器关闭按钮
+    if (screenContainer) {
+        const closeButton = screenContainer.querySelector('.close-button');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                stopScreenShare();
+            });
         }
     }
-});
-
-// 屏幕容器关闭按钮
-screenContainer.querySelector('.close-button').addEventListener('click', () => {
-    stopScreenShare();
-});
+}
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 页面初始化开始...');
+
+    // 初始化 DOM 元素
+    initializeDOMElements();
+    
+    // 绑定事件监听器
+    bindEventListeners();
 
     // 检查服务器是否要求认证
     const authRequired = document.querySelector('meta[name="auth-required"]');
@@ -919,9 +990,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await userAuth.checkAuth();
 
     // 初始状态设置
-    micButton.disabled = true;
-    cameraButton.disabled = true;
-    screenButton.disabled = true;
+    if (micButton) micButton.disabled = true;
+    if (cameraButton) cameraButton.disabled = true;
+    if (screenButton) screenButton.disabled = true;
 
     logSystem('应用已初始化，请连接到 Gemini Live API');
     console.log('✅ 页面初始化完成');
