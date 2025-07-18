@@ -18,6 +18,7 @@ class UserAuthManager {
         this.sessionToken = this.getSessionTokenFromCookie() || localStorage.getItem('sessionToken');
         this.currentUser = null;
         this.isAuthenticated = false;
+        this.infoModalShown = false; // 添加弹窗显示标志
     }
 
     // 从Cookie获取会话令牌
@@ -73,6 +74,10 @@ class UserAuthManager {
                     this.isAuthenticated = true;
                     this.updateUserUI();
                     this.hideLoginOverlay();
+                    
+                    // 登录成功后显示信息弹窗
+                    this.showInfoModal();
+                    
                     console.log('✅ 认证成功，用户:', data.user.username);
                     return true;
                 } else {
@@ -144,9 +149,6 @@ class UserAuthManager {
             } else {
                 apiKeyInput.style.display = 'block';
             }
-
-            // 登录成功后显示信息弹窗
-            this.showInfoModal();
         } else {
             userInfo.style.display = 'none';
             apiKeyInput.style.display = 'block';
@@ -161,9 +163,15 @@ class UserAuthManager {
             return;
         }
 
+        // 检查是否已经显示过弹窗（防止重复显示）
+        if (this.infoModalShown) {
+            return;
+        }
+
         const modal = document.getElementById('info-modal');
         if (modal) {
             modal.style.display = 'flex';
+            this.infoModalShown = true; // 设置标志，防止重复显示
             
             // 绑定关闭按钮事件
             const closeBtn = document.getElementById('close-info-modal');
