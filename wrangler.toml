@@ -12,7 +12,7 @@ assets = { directory = "./src/static" }
 # 注意：敏感数据请使用 Secrets 存储
 [vars]
 # 网络配置
-GEMINI_API_BASE_URL = "https://ga.docman.edu.kg"
+GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com"
 # 备用域名列表，当主域名无法访问时自动尝试
 # 多个域名用逗号分隔，支持故障转移
 GEMINI_API_FALLBACK_URLS = "https://backup1.docman.edu.kg,https://backup2.docman.edu.kg,https://generativelanguage.googleapis.com"

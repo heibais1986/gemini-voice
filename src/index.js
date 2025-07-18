@@ -282,12 +282,25 @@ async function recordApiUsage(userId, env) {
 async function createModifiedRequest(originalRequest, authResult, env) {
   const authService = new AuthService(env.DB, env);
   let apiKey;
+  
   if (authResult.isPremium) {
+    // 付费用户使用服务器API Key
     apiKey = env.SERVER_GEMINI_API_KEY;
   } else {
+    // 免费用户尝试从数据库获取API Key
     apiKey = await authService.getUserApiKey(authResult.user.id);
+    
+    // 如果用户没有设置API Key，尝试从请求头获取
     if (!apiKey) {
-      throw new Error('User API key not found');
+      const authHeader = originalRequest.headers.get('Authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        apiKey = authHeader.substring(7);
+      }
+    }
+    
+    // 如果还是没有API Key，返回错误
+    if (!apiKey) {
+      throw new Error('API key not found. Please set your Gemini API key in the input field.');
     }
   }
 
@@ -335,6 +348,12 @@ async function handleWebSocket(request, env) {
 
   const url = new URL(request.url);
   const pathAndQuery = url.pathname + url.search;
+  
+  // 从URL参数中提取API Key
+  const apiKey = url.searchParams.get('key');
+  if (!apiKey) {
+    return new Response("API key is required", { status: 400 });
+  }
 
   const [client, proxy] = new WebSocketPair();
   proxy.accept();
@@ -373,6 +392,7 @@ async function handleWebSocket(request, env) {
     const allUrls = [baseUrl, ...fallbackUrls.filter(url => url !== baseUrl)];
 
     for (const wsProtocolUrl of allUrls) {
+      // 构建带有API Key的WebSocket URL
       const fullWsUrl = `${wsProtocolUrl}${pathAndQuery}`;
       targetWebSocket = await tryConnectWebSocket(fullWsUrl);
       if (targetWebSocket) break;
