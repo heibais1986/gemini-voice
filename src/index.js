@@ -212,7 +212,7 @@ async function serveStaticFile(filePath) {
 // --- API 请求处理 ---
 
 /**
- * 处理后端的API请求，包括认证和权限检查
+ * 处理后端的API请求，简化版本（移除付费逻辑）
  */
 async function handleAPIRequest(request, env) {
   try {
@@ -221,11 +221,7 @@ async function handleAPIRequest(request, env) {
       return new Response(JSON.stringify({ error: authResult.error }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
-    if (!authResult.canUseApi) {
-      return new Response(JSON.stringify({ error: 'Daily API limit exceeded' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
-    }
-
-    await recordApiUsage(authResult.user.id, env);
+    // 移除付费用户检查，所有用户都需要提供自己的API Key
     const modifiedRequest = await createModifiedRequest(request, authResult, env);
 
     // 动态导入并执行API代理
@@ -239,7 +235,7 @@ async function handleAPIRequest(request, env) {
 }
 
 /**
- * 检查API请求的用户认证和权限 (基于Authorization头)
+ * 检查API请求的用户认证（简化版本，移除付费检查）
  */
 async function checkUserAuth(request, env) {
   try {
@@ -256,8 +252,8 @@ async function checkUserAuth(request, env) {
       return { success: false, error: sessionResult.error };
     }
 
-    const permission = await authService.checkUserPermission(sessionResult.user.id);
-    return { success: true, ...sessionResult, ...permission };
+    // 移除付费权限检查，所有认证用户都可以使用API（需要自己的API Key）
+    return { success: true, ...sessionResult };
   } catch (error) {
     console.error('API auth check failed:', error);
     return { success: false, error: 'Authentication failed' };
@@ -277,31 +273,27 @@ async function recordApiUsage(userId, env) {
 }
 
 /**
- * 根据用户类型（付费/免费）创建修改后的请求，使用正确的API Key
+ * 创建修改后的请求，所有用户都使用自己的API Key
  */
 async function createModifiedRequest(originalRequest, authResult, env) {
   const authService = new AuthService(env.DB, env);
   let apiKey;
-  
-  if (authResult.isPremium) {
-    // 付费用户使用服务器API Key
-    apiKey = env.SERVER_GEMINI_API_KEY;
-  } else {
-    // 免费用户尝试从数据库获取API Key
-    apiKey = await authService.getUserApiKey(authResult.user.id);
-    
-    // 如果用户没有设置API Key，尝试从请求头获取
-    if (!apiKey) {
-      const authHeader = originalRequest.headers.get('Authorization');
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        apiKey = authHeader.substring(7);
-      }
+
+  // 所有用户都需要提供自己的API Key
+  // 首先尝试从数据库获取用户保存的API Key
+  apiKey = await authService.getUserApiKey(authResult.user.id);
+
+  // 如果用户没有设置API Key，尝试从请求头获取
+  if (!apiKey) {
+    const authHeader = originalRequest.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      apiKey = authHeader.substring(7);
     }
-    
-    // 如果还是没有API Key，返回错误
-    if (!apiKey) {
-      throw new Error('API key not found. Please set your Gemini API key in the input field.');
-    }
+  }
+
+  // 如果还是没有API Key，返回错误
+  if (!apiKey) {
+    throw new Error('API key not found. Please set your Gemini API key in the settings.');
   }
 
   const headers = new Headers(originalRequest.headers);
@@ -557,8 +549,8 @@ async function handleUserSystemAPI(request, env, pathname) {
         id: Date.now().toString(),
         phone: phone,
         username: `用户${phone.slice(-4)}`,
-        user_type: 'free',
         created_at: new Date().toISOString()
+        // 移除 user_type 字段，所有用户都是普通用户
       };
 
       // 生成会话令牌
@@ -613,8 +605,8 @@ async function handleUserSystemAPI(request, env, pathname) {
       const user = {
         id: sessionToken.split('_')[1] || '123',
         phone: '13800138000',
-        username: '测试用户',
-        user_type: 'free'
+        username: '测试用户'
+        // 移除 user_type 字段
       };
 
       console.log('✅ 用户信息验证成功:', user.username);

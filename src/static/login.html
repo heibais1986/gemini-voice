@@ -58,46 +58,14 @@
                 </div>
                 <div class="user-details">
                     <h3 id="userName">用户名</h3>
-                    <p id="userType">免费用户</p>
-                    <p id="userExpiry"></p>
+                    <p>请在主页面设置您的 Gemini API Key</p>
                 </div>
                 <div class="user-actions">
-                    <button id="upgradeBtn" class="upgrade-btn">升级为付费用户</button>
                     <button id="apiKeyBtn" class="api-key-btn">设置API Key</button>
                     <button id="logoutBtn" class="logout-btn">退出登录</button>
                 </div>
             </div>
-            <!-- 支付模态框 -->
-            <div class="modal" id="paymentModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>升级为付费用户</h3>
-                        <span class="close" id="closePaymentModal">&times;</span>
-                    </div>
-                    <div class="modal-body">
-                        <div class="pricing-info">
-                            <h4>年费会员</h4>
-                            <div class="price">¥20.00 / 年</div>
-                            <ul class="features">
-                                <li>✓ 无需配置API Key</li>
-                                <li>✓ 每日10,000次API调用</li>
-                                <li>✓ 优先技术支持</li>
-                                <li>✓ 新功能优先体验</li>
-                            </ul>
-                        </div>
-                        <div class="payment-methods">
-                            <button class="payment-btn wechat-pay" data-method="wechat">
-                                <span class="payment-icon">💚</span>
-                                微信支付
-                            </button>
-                            <button class="payment-btn alipay" data-method="alipay">
-                                <span class="payment-icon">🔵</span>
-                                支付宝
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- 支付模态框已移除 -->
             <!-- API Key 模态框 -->
             <div class="modal" id="apiKeyModal">
                 <div class="modal-content">
@@ -107,7 +75,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="api-key-info">
-                            <p>如果您有自己的Gemini API Key，可以在这里设置。使用自己的API Key无需付费。</p>
+                            <p>请设置您的 Gemini API Key 以使用智能助手功能。</p>
                             <a href="https://aistudio.google.com" target="_blank">获取API Key</a>
                         </div>
                         <form id="apiKeyForm">

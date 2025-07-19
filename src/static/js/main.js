@@ -174,24 +174,18 @@ class UserAuthManager {
         const userInfo = document.getElementById('user-info');
         const userAvatar = document.getElementById('user-avatar');
         const userName = document.getElementById('user-name');
-        const userType = document.getElementById('user-type');
         const apiKeyInput = document.getElementById('api-key');
 
         if (this.currentUser) {
             userInfo.style.display = 'flex';
             userName.textContent = this.currentUser.username || '用户';
-            userType.textContent = this.currentUser.user_type === 'premium' ? '付费用户' : '免费用户';
 
             if (this.currentUser.avatar_url) {
                 userAvatar.src = this.currentUser.avatar_url;
             }
 
-            // 付费用户隐藏API Key输入框
-            if (this.currentUser.user_type === 'premium') {
-                apiKeyInput.style.display = 'none';
-            } else {
-                apiKeyInput.style.display = 'block';
-            }
+            // 所有用户都显示API Key输入框
+            apiKeyInput.style.display = 'block';
         } else {
             userInfo.style.display = 'none';
             apiKeyInput.style.display = 'block';
@@ -737,7 +731,7 @@ async function connectToWebsocket() {
 }
 
 /**
- * Connects to WebSocket with authentication.
+ * Connects to WebSocket with authentication (所有用户都需要API Key).
  */
 async function connectToWebsocketWithAuth() {
     if (!userAuth.isAuthenticated) {
@@ -748,12 +742,24 @@ async function connectToWebsocketWithAuth() {
         }
     }
 
+    // 检查API Key输入
+    if (!apiKeyInput) {
+        alert('API Key 输入框未找到');
+        return;
+    }
+
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+        alert('请输入 Gemini API Key 才能连接');
+        return;
+    }
+
     try {
         await ensureAudioInitialized();
 
         client = new MultimodalLiveClient({
             url: CONFIG.WEBSOCKET_URL,
-            sessionToken: userAuth.sessionToken,
+            apiKey: apiKey,  // 使用用户输入的API Key
             model: CONFIG.MODEL,
             systemInstruction: (systemInstructionInput ? systemInstructionInput.value : '') || CONFIG.SYSTEM_INSTRUCTION.TEXT,
             voice: voiceSelect ? voiceSelect.value : CONFIG.DEFAULTS.VOICE,
@@ -985,11 +991,12 @@ function bindEventListeners() {
             if (isConnected) {
                 disconnectFromWebsocket();
             } else {
-                // 根据用户认证状态选择连接方式
+                // 所有用户都使用统一的连接方式（需要API Key）
                 if (userAuth.isAuthenticated) {
                     connectToWebsocketWithAuth();
                 } else {
-                    connectToWebsocket();
+                    // 未登录用户需要先登录
+                    userAuth.showLoginOverlay();
                 }
             }
         });

@@ -37,40 +37,44 @@ class LoginManager {
         });
 
         // 用户操作按钮
-        document.getElementById('upgradeBtn').addEventListener('click', () => {
-            this.showPaymentModal();
-        });
+        const apiKeyBtn = document.getElementById('apiKeyBtn');
+        if (apiKeyBtn) {
+            apiKeyBtn.addEventListener('click', () => {
+                this.showApiKeyModal();
+            });
+        }
 
-        document.getElementById('apiKeyBtn').addEventListener('click', () => {
-            this.showApiKeyModal();
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            this.logout();
-        });
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                this.logout();
+            });
+        }
 
         // 模态框关闭
-        document.getElementById('closePaymentModal').addEventListener('click', () => {
-            this.hidePaymentModal();
-        });
+        const closeApiKeyModal = document.getElementById('closeApiKeyModal');
+        if (closeApiKeyModal) {
+            closeApiKeyModal.addEventListener('click', () => {
+                this.hideApiKeyModal();
+            });
+        }
 
-        document.getElementById('closeApiKeyModal').addEventListener('click', () => {
-            this.hideApiKeyModal();
-        });
+        // API Key 表单提交
+        const apiKeyForm = document.getElementById('apiKeyForm');
+        if (apiKeyForm) {
+            apiKeyForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveApiKey();
+            });
+        }
 
-        // 支付按钮
-        document.getElementById('wechatPayBtn').addEventListener('click', () => {
-            this.processPayment('wechat');
-        });
-
-        document.getElementById('alipayBtn').addEventListener('click', () => {
-            this.processPayment('alipay');
-        });
-
-        // API Key 保存
-        document.getElementById('saveApiKeyBtn').addEventListener('click', () => {
-            this.saveApiKey();
-        });
+        // 取消按钮
+        const cancelApiKey = document.getElementById('cancelApiKey');
+        if (cancelApiKey) {
+            cancelApiKey.addEventListener('click', () => {
+                this.hideApiKeyModal();
+            });
+        }
     }
 
     switchTab(tabName) {
@@ -315,135 +319,44 @@ class LoginManager {
 
         // 更新用户信息
         document.getElementById('userName').textContent = user.username || '用户';
-        document.getElementById('userPhone').textContent = user.phone || '';
-        document.getElementById('userType').textContent = user.user_type === 'premium' ? '付费用户' : '免费用户';
-        document.getElementById('apiCallsUsed').textContent = user.api_calls_today || 0;
-        document.getElementById('apiCallsLimit').textContent = user.user_type === 'premium' ? '1000' : '100';
 
-        if (user.premium_expires_at) {
-            document.getElementById('premiumExpiry').textContent = new Date(user.premium_expires_at).toLocaleDateString();
-            document.getElementById('premiumInfo').style.display = 'block';
+        // 所有用户都显示API Key设置按钮
+        const apiKeyBtn = document.getElementById('apiKeyBtn');
+        if (apiKeyBtn) {
+            apiKeyBtn.style.display = 'block';
         }
-
-        // 根据用户类型显示相应按钮
-        if (user.user_type === 'free') {
-            document.getElementById('upgradeBtn').style.display = 'block';
-            document.getElementById('apiKeyBtn').style.display = 'block';
-        } else {
-            document.getElementById('upgradeBtn').style.display = 'none';
-            document.getElementById('apiKeyBtn').style.display = 'none';
-        }
-    }
-
-    showPaymentModal() {
-        document.getElementById('paymentModal').style.display = 'block';
-    }
-
-    hidePaymentModal() {
-        document.getElementById('paymentModal').style.display = 'none';
     }
 
     showApiKeyModal() {
-        document.getElementById('apiKeyModal').style.display = 'block';
-        // 加载当前保存的API Key
-        const savedApiKey = localStorage.getItem('gemini_api_key');
-        if (savedApiKey) {
-            document.getElementById('userApiKey').value = savedApiKey;
+        const modal = document.getElementById('apiKeyModal');
+        if (modal) {
+            modal.style.display = 'block';
+            // 加载当前保存的API Key
+            const savedApiKey = localStorage.getItem('gemini_api_key');
+            const apiKeyInput = document.getElementById('apiKey');
+            if (savedApiKey && apiKeyInput) {
+                apiKeyInput.value = savedApiKey;
+            }
         }
     }
 
     hideApiKeyModal() {
-        document.getElementById('apiKeyModal').style.display = 'none';
-    }
-
-    async processPayment(method) {
-        try {
-            const response = await fetch('/api/payment/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.sessionToken}`
-                },
-                body: JSON.stringify({
-                    method: method,
-                    amount: 20.00,
-                    description: '升级到付费用户'
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                if (method === 'wechat') {
-                    this.showWechatPayQR(data.qrCode);
-                } else if (method === 'alipay') {
-                    window.open(data.payUrl, '_blank');
-                }
-                this.pollPaymentStatus(data.orderId);
-            } else {
-                this.showMessage(data.message || '创建支付订单失败', 'error');
-            }
-        } catch (error) {
-            console.error('Payment error:', error);
-            this.showMessage('网络错误，请重试', 'error');
+        const modal = document.getElementById('apiKeyModal');
+        if (modal) {
+            modal.style.display = 'none';
         }
     }
 
-    showWechatPayQR(qrCode) {
-        const paymentContent = document.querySelector('.payment-content');
-        paymentContent.innerHTML = `
-            <h3>微信支付</h3>
-            <div class="payment-qr">
-                <img src="${qrCode}" alt="微信支付二维码">
-                <p>请使用微信扫描二维码完成支付</p>
-                <div class="payment-status">等待支付...</div>
-            </div>
-        `;
-    }
-
-    async pollPaymentStatus(orderId) {
-        const maxAttempts = 60; // 5分钟
-        let attempts = 0;
-
-        const poll = async () => {
-            if (attempts >= maxAttempts) {
-                this.showMessage('支付超时，请重试', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/payment/status/${orderId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${this.sessionToken}`
-                    }
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.status === 'paid') {
-                    this.showMessage('支付成功！正在升级账户...', 'success');
-                    this.hidePaymentModal();
-                    // 刷新用户信息
-                    setTimeout(() => {
-                        this.verifySession();
-                    }, 2000);
-                    return;
-                }
-
-                attempts++;
-                setTimeout(poll, 5000);
-            } catch (error) {
-                console.error('Poll payment status error:', error);
-                attempts++;
-                setTimeout(poll, 5000);
-            }
-        };
-
-        poll();
-    }
+    // 付费相关方法已移除
 
     saveApiKey() {
-        const apiKey = document.getElementById('userApiKey').value.trim();
+        const apiKeyInput = document.getElementById('apiKey');
+        if (!apiKeyInput) {
+            this.showMessage('找不到API Key输入框', 'error');
+            return;
+        }
+
+        const apiKey = apiKeyInput.value.trim();
         if (!apiKey) {
             this.showMessage('请输入API Key', 'error');
             return;
