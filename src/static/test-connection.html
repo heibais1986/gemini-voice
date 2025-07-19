@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连接功能测试</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-error { color: #dc3545; }
+        .log-success { color: #28a745; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-connected { background: #28a745; }
+        .status-disconnected { background: #dc3545; }
+        .status-connecting { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>连接功能测试页面</h1>
+        <p>这个页面用于测试API Key输入和WebSocket连接功能。</p>
+        
+        <!-- 连接控制区域 -->
+        <div class="test-section">
+            <h3>连接控制</h3>
+            <div>
+                <label for="test-api-key">API Key:</label>
+                <input type="password" id="test-api-key" placeholder="请输入 Gemini API Key" style="width: 300px; margin: 10px;">
+            </div>
+            <div>
+                <span class="status-indicator" id="connection-status"></span>
+                <span id="connection-text">未连接</span>
+            </div>
+            <div style="margin-top: 10px;">
+                <button class="test-button" id="connect-btn" onclick="testConnect()">连接</button>
+                <button class="test-button" id="disconnect-btn" onclick="testDisconnect()" disabled>断开连接</button>
+                <button class="test-button" onclick="checkElements()">检查元素</button>
+                <button class="test-button" onclick="clearLog()">清空日志</button>
+            </div>
+        </div>
+        
+        <!-- 状态显示 -->
+        <div class="test-section">
+            <h3>当前状态</h3>
+            <p>API Key: <span id="api-key-status">检查中...</span></p>
+            <p>用户认证: <span id="auth-status">检查中...</span></p>
+            <p>连接状态: <span id="ws-status">检查中...</span></p>
+            <p>音频初始化: <span id="audio-status">检查中...</span></p>
+        </div>
+        
+        <div class="log-container" id="log-container">
+            <div class="log-entry log-info">测试页面已加载，等待操作...</div>
+        </div>
+    </div>
+
+    <!-- 模拟用户认证 -->
+    <script>
+        // 模拟用户认证对象
+        window.userAuth = {
+            isAuthenticated: true,
+            sessionToken: 'test-session-token',
+            currentUser: { username: '测试用户' },
+            checkAuth: async function() {
+                return true;
+            },
+            showLoginOverlay: function() {
+                log('显示登录遮罩', 'info');
+            },
+            hideLoginOverlay: function() {
+                log('隐藏登录遮罩', 'info');
+            }
+        };
+        
+        // 模拟全局变量
+        let isConnected = false;
+        let client = null;
+        let audioCtx = null;
+        let audioStreamer = null;
+        
+        // 测试连接函数
+        async function testConnect() {
+            log('🚀 开始测试连接...', 'info');
+            
+            const apiKeyInput = document.getElementById('test-api-key');
+            const apiKey = apiKeyInput.value.trim();
+            
+            if (!apiKey) {
+                log('❌ 请输入API Key', 'error');
+                alert('请输入API Key');
+                return;
+            }
+            
+            log('🔑 API Key已输入，长度: ' + apiKey.length, 'success');
+            
+            try {
+                // 更新UI状态
+                updateConnectionStatus('connecting', '连接中...');
+                document.getElementById('connect-btn').disabled = true;
+                
+                // 模拟连接过程
+                log('🔌 模拟WebSocket连接...', 'info');
+                
+                // 这里可以添加实际的连接逻辑
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 模拟连接成功
+                isConnected = true;
+                updateConnectionStatus('connected', '已连接');
+                document.getElementById('connect-btn').disabled = true;
+                document.getElementById('disconnect-btn').disabled = false;
+                
+                log('✅ 连接成功！', 'success');
+                
+            } catch (error) {
+                log('❌ 连接失败: ' + error.message, 'error');
+                updateConnectionStatus('disconnected', '连接失败');
+                document.getElementById('connect-btn').disabled = false;
+            }
+            
+            updateStatus();
+        }
+        
+        function testDisconnect() {
+            log('🔌 断开连接...', 'info');
+            
+            isConnected = false;
+            updateConnectionStatus('disconnected', '未连接');
+            document.getElementById('connect-btn').disabled = false;
+            document.getElementById('disconnect-btn').disabled = true;
+            
+            log('✅ 已断开连接', 'success');
+            updateStatus();
+        }
+        
+        function updateConnectionStatus(status, text) {
+            const indicator = document.getElementById('connection-status');
+            const textElement = document.getElementById('connection-text');
+            
+            indicator.className = 'status-indicator status-' + status;
+            textElement.textContent = text;
+        }
+        
+        function checkElements() {
+            log('🔍 检查页面元素...', 'info');
+            
+            const apiKeyInput = document.getElementById('test-api-key');
+            log('API Key输入框: ' + (apiKeyInput ? '存在' : '不存在'), apiKeyInput ? 'success' : 'error');
+            
+            if (apiKeyInput) {
+                log('API Key值: ' + (apiKeyInput.value ? '已输入' : '未输入'), 'info');
+            }
+            
+            log('用户认证对象: ' + (window.userAuth ? '存在' : '不存在'), window.userAuth ? 'success' : 'error');
+            log('连接状态: ' + (isConnected ? '已连接' : '未连接'), 'info');
+            
+            updateStatus();
+        }
+        
+        function updateStatus() {
+            // 检查API Key
+            const apiKeyInput = document.getElementById('test-api-key');
+            document.getElementById('api-key-status').textContent = 
+                apiKeyInput && apiKeyInput.value ? '已输入' : '未输入';
+            
+            // 检查用户认证
+            document.getElementById('auth-status').textContent = 
+                window.userAuth && window.userAuth.isAuthenticated ? '已认证' : '未认证';
+            
+            // 检查连接状态
+            document.getElementById('ws-status').textContent = 
+                isConnected ? '已连接' : '未连接';
+            
+            // 检查音频状态
+            document.getElementById('audio-status').textContent = 
+                audioCtx ? '已初始化' : '未初始化';
+        }
+        
+        function clearLog() {
+            document.getElementById('log-container').innerHTML = '';
+        }
+        
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-' + type;
+            logEntry.textContent = '[' + timestamp + '] ' + message;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('测试页面DOM已加载', 'success');
+            updateConnectionStatus('disconnected', '未连接');
+            updateStatus();
+            
+            // 定期更新状态
+            setInterval(updateStatus, 5000);
+        });
+    </script>
+</body>
+</html>

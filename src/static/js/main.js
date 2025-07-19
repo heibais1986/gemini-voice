@@ -764,40 +764,77 @@ async function connectToWebsocket() {
  * Connects to WebSocket with authentication (所有用户都需要API Key).
  */
 async function connectToWebsocketWithAuth() {
+    console.log('🚀 connectToWebsocketWithAuth() 开始执行...');
+    console.log('🔐 用户认证状态:', userAuth.isAuthenticated);
+
     if (!userAuth.isAuthenticated) {
+        console.log('❌ 用户未认证，重新检查认证状态...');
         const authSuccess = await userAuth.checkAuth();
         if (!authSuccess) {
+            console.log('❌ 认证检查失败，显示登录遮罩');
             userAuth.showLoginOverlay();
             return;
         }
     }
 
     // 检查API Key输入
+    console.log('🔑 检查API Key输入框...');
+    console.log('🔍 apiKeyInput元素:', apiKeyInput);
+
     if (!apiKeyInput) {
+        console.error('❌ API Key 输入框未找到');
         alert('API Key 输入框未找到');
         return;
     }
 
     const apiKey = apiKeyInput.value.trim();
+    console.log('🔑 API Key值:', apiKey ? '已输入' : '未输入');
+    console.log('🔑 API Key长度:', apiKey.length);
+
     if (!apiKey) {
+        console.log('❌ API Key为空，显示提示');
         alert('请输入 Gemini API Key 才能连接');
         return;
     }
 
     try {
+        console.log('🎵 初始化音频...');
         await ensureAudioInitialized();
 
-        client = new MultimodalLiveClient({
-            url: CONFIG.WEBSOCKET_URL,
-            apiKey: apiKey,  // 使用用户输入的API Key
+        console.log('🔧 创建WebSocket客户端...');
+        console.log('📡 WebSocket URL:', CONFIG.WEBSOCKET_URL);
+        console.log('🤖 模型:', CONFIG.MODEL);
+
+        const clientConfig = {
             model: CONFIG.MODEL,
-            systemInstruction: (systemInstructionInput ? systemInstructionInput.value : '') || CONFIG.SYSTEM_INSTRUCTION.TEXT,
-            voice: voiceSelect ? voiceSelect.value : CONFIG.DEFAULTS.VOICE,
-            language: languageSelect ? languageSelect.value : CONFIG.DEFAULTS.LANGUAGE,
-            responseType: responseTypeSelect ? responseTypeSelect.value : 'audio'
+            generationConfig: {
+                responseModalities: responseTypeSelect ? [responseTypeSelect.value] : ['audio'],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: {
+                            voiceName: voiceSelect ? voiceSelect.value : CONFIG.DEFAULTS.VOICE
+                        }
+                    }
+                }
+            },
+            systemInstruction: {
+                parts: [{
+                    text: (systemInstructionInput ? systemInstructionInput.value : '') || CONFIG.SYSTEM_INSTRUCTION.TEXT
+                }]
+            }
+        };
+
+        console.log('⚙️ 客户端配置:', {
+            model: clientConfig.model,
+            responseModalities: clientConfig.generationConfig.responseModalities,
+            voiceName: clientConfig.generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName,
+            hasApiKey: !!apiKey
         });
 
-        await client.connect();
+        client = new MultimodalLiveClient();
+
+        console.log('🔌 尝试连接到WebSocket...');
+        await client.connect(clientConfig, apiKey);
 
         client.on('open', () => {
             isConnected = true;
@@ -1017,19 +1054,29 @@ function bindEventListeners() {
 
     // 连接按钮事件监听器
     if (connectButton) {
+        console.log('🔗 绑定连接按钮事件监听器');
         connectButton.addEventListener('click', () => {
+            console.log('🖱️ 连接按钮被点击');
+            console.log('🔌 当前连接状态:', isConnected);
+            console.log('🔐 用户认证状态:', userAuth.isAuthenticated);
+
             if (isConnected) {
+                console.log('🔌 断开连接...');
                 disconnectFromWebsocket();
             } else {
                 // 所有用户都使用统一的连接方式（需要API Key）
                 if (userAuth.isAuthenticated) {
+                    console.log('✅ 用户已认证，尝试连接...');
                     connectToWebsocketWithAuth();
                 } else {
+                    console.log('❌ 用户未认证，显示登录遮罩');
                     // 未登录用户需要先登录
                     userAuth.showLoginOverlay();
                 }
             }
         });
+    } else {
+        console.error('❌ 找不到连接按钮元素');
     }
 
     // 屏幕容器关闭按钮
