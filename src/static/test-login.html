@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录遮罩测试页面</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .log-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-error { color: #dc3545; }
+        .log-success { color: #28a745; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>登录遮罩测试页面</h1>
+        <p>这个页面用于测试登录遮罩在不同情况下的显示效果。</p>
+        
+        <div class="test-controls">
+            <h3>测试控制</h3>
+            <button class="test-button" onclick="showOverlay()">显示登录遮罩</button>
+            <button class="test-button" onclick="hideOverlay()">隐藏登录遮罩</button>
+            <button class="test-button" onclick="clearToken()">清除会话令牌</button>
+            <button class="test-button" onclick="setToken()">设置会话令牌</button>
+            <button class="test-button" onclick="checkElements()">检查页面元素</button>
+            <button class="test-button" onclick="clearLog()">清空日志</button>
+        </div>
+        
+        <div class="test-info">
+            <h3>当前状态</h3>
+            <p>会话令牌: <span id="token-status">检查中...</span></p>
+            <p>登录遮罩: <span id="overlay-status">检查中...</span></p>
+            <p>CSS加载: <span id="css-status">检查中...</span></p>
+            <p>JS加载: <span id="js-status">检查中...</span></p>
+        </div>
+        
+        <div class="log-container" id="log-container">
+            <div class="log-entry log-info">测试页面已加载，等待操作...</div>
+        </div>
+    </div>
+
+    <!-- 登录检查遮罩 -->
+    <div id="login-overlay" class="login-overlay" style="display: none;">
+        <div class="login-prompt">
+            <h2>请先登录</h2>
+            <p>使用 Gemini Playground 需要先登录账户</p>
+            <button id="go-login" class="login-btn">前往登录</button>
+        </div>
+    </div>
+
+    <script>
+        // 测试函数
+        function showOverlay() {
+            log('尝试显示登录遮罩...', 'info');
+            const overlay = document.getElementById('login-overlay');
+            if (overlay) {
+                overlay.classList.remove('force-hide');
+                overlay.classList.add('force-show');
+                overlay.style.display = 'flex';
+                log('登录遮罩已显示', 'success');
+            } else {
+                log('找不到登录遮罩元素', 'error');
+            }
+            updateStatus();
+        }
+        
+        function hideOverlay() {
+            log('尝试隐藏登录遮罩...', 'info');
+            const overlay = document.getElementById('login-overlay');
+            if (overlay) {
+                overlay.classList.remove('force-show');
+                overlay.classList.add('force-hide');
+                overlay.style.display = 'none';
+                log('登录遮罩已隐藏', 'success');
+            } else {
+                log('找不到登录遮罩元素', 'error');
+            }
+            updateStatus();
+        }
+        
+        function clearToken() {
+            localStorage.removeItem('sessionToken');
+            document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            log('会话令牌已清除', 'warning');
+            updateStatus();
+        }
+        
+        function setToken() {
+            const token = 'test-token-' + Date.now();
+            localStorage.setItem('sessionToken', token);
+            log('会话令牌已设置: ' + token, 'success');
+            updateStatus();
+        }
+        
+        function checkElements() {
+            log('检查页面元素...', 'info');
+            
+            const overlay = document.getElementById('login-overlay');
+            log('登录遮罩元素: ' + (overlay ? '存在' : '不存在'), overlay ? 'success' : 'error');
+            
+            if (overlay) {
+                const computedStyle = window.getComputedStyle(overlay);
+                log('遮罩计算样式: display=' + computedStyle.display + ', visibility=' + computedStyle.visibility + ', z-index=' + computedStyle.zIndex, 'info');
+                log('遮罩内联样式: ' + overlay.style.cssText, 'info');
+                log('遮罩类名: ' + overlay.className, 'info');
+            }
+            
+            const cssLink = document.querySelector('link[href*="style.css"]');
+            log('CSS文件: ' + (cssLink ? '已加载' : '未加载'), cssLink ? 'success' : 'error');
+            
+            updateStatus();
+        }
+        
+        function clearLog() {
+            document.getElementById('log-container').innerHTML = '';
+        }
+        
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-' + type;
+            logEntry.textContent = '[' + timestamp + '] ' + message;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus() {
+            // 检查会话令牌
+            const token = localStorage.getItem('sessionToken') || getCookie('sessionToken');
+            document.getElementById('token-status').textContent = token ? '存在' : '不存在';
+            
+            // 检查登录遮罩
+            const overlay = document.getElementById('login-overlay');
+            if (overlay) {
+                const isVisible = overlay.style.display !== 'none' && !overlay.classList.contains('force-hide');
+                document.getElementById('overlay-status').textContent = isVisible ? '显示中' : '已隐藏';
+            } else {
+                document.getElementById('overlay-status').textContent = '元素不存在';
+            }
+            
+            // 检查CSS
+            const cssLink = document.querySelector('link[href*="style.css"]');
+            document.getElementById('css-status').textContent = cssLink ? '已加载' : '未加载';
+            
+            // 检查JS
+            document.getElementById('js-status').textContent = typeof window.userAuth !== 'undefined' ? '已加载' : '未加载';
+        }
+        
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.trim().split('=');
+                if (cookieName === name) {
+                    return decodeURIComponent(cookieValue);
+                }
+            }
+            return null;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('测试页面DOM已加载', 'success');
+            updateStatus();
+            
+            // 绑定登录按钮
+            const goLoginBtn = document.getElementById('go-login');
+            if (goLoginBtn) {
+                goLoginBtn.addEventListener('click', function() {
+                    log('点击了登录按钮', 'info');
+                    alert('这是测试页面，登录按钮已被点击');
+                });
+            }
+            
+            // 定期更新状态
+            setInterval(updateStatus, 5000);
+        });
+    </script>
+</body>
+</html>

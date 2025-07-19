@@ -124,10 +124,26 @@ class UserAuthManager {
         console.log('🔓 尝试显示登录遮罩...');
         const overlay = document.getElementById('login-overlay');
         if (overlay) {
+            // 使用CSS类控制显示
+            overlay.classList.remove('force-hide');
+            overlay.classList.add('force-show');
+
+            // 同时设置内联样式作为备用
             overlay.style.display = 'flex';
+            overlay.style.visibility = 'visible';
+            overlay.style.opacity = '1';
+
             console.log('✅ 登录遮罩已显示');
+            console.log('📏 遮罩当前样式:', {
+                display: overlay.style.display,
+                visibility: overlay.style.visibility,
+                opacity: overlay.style.opacity,
+                zIndex: window.getComputedStyle(overlay).zIndex,
+                className: overlay.className
+            });
         } else {
             console.error('❌ 找不到login-overlay元素');
+            console.log('🔍 当前页面所有元素:', Array.from(document.querySelectorAll('*[id]')).map(el => el.id));
         }
     }
 
@@ -135,7 +151,13 @@ class UserAuthManager {
         console.log('🔒 隐藏登录遮罩...');
         const overlay = document.getElementById('login-overlay');
         if (overlay) {
+            // 使用CSS类控制隐藏
+            overlay.classList.remove('force-show');
+            overlay.classList.add('force-hide');
+
+            // 同时设置内联样式作为备用
             overlay.style.display = 'none';
+
             console.log('✅ 登录遮罩已隐藏');
         } else {
             console.error('❌ 找不到login-overlay元素');
@@ -248,6 +270,9 @@ class UserAuthManager {
 
 // 创建用户认证管理器实例
 const userAuth = new UserAuthManager();
+
+// 将userAuth暴露到全局，以便备用脚本检测
+window.userAuth = userAuth;
 
 // 全局变量
 let client = null;
@@ -977,26 +1002,44 @@ function bindEventListeners() {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 页面初始化开始...');
+    console.log('🚀 main.js 页面初始化开始...');
 
-    // 初始化 DOM 元素
-    initializeDOMElements();
-    
-    // 绑定事件监听器
-    bindEventListeners();
+    try {
+        // 初始化 DOM 元素
+        console.log('📋 初始化DOM元素...');
+        initializeDOMElements();
 
-    // 检查服务器是否要求认证
-    const authRequired = document.querySelector('meta[name="auth-required"]');
-    console.log('🔍 检查auth-required meta标签:', authRequired);
-    if (authRequired) {
-        console.log('📋 meta标签内容:', authRequired.content);
-    }
+        // 绑定事件监听器
+        console.log('🔗 绑定事件监听器...');
+        bindEventListeners();
 
-    if (authRequired && authRequired.content === 'true') {
-        console.log('✅ 发现auth-required=true，显示登录遮罩');
-        userAuth.showLoginOverlay();
-    } else {
-        console.log('❌ 未发现auth-required=true，继续认证检查');
+        // 检查服务器是否要求认证
+        const authRequired = document.querySelector('meta[name="auth-required"]');
+        console.log('🔍 检查auth-required meta标签:', authRequired);
+        if (authRequired) {
+            console.log('📋 meta标签内容:', authRequired.content);
+        }
+
+        if (authRequired && authRequired.content === 'true') {
+            console.log('✅ 发现auth-required=true，显示登录遮罩');
+            userAuth.showLoginOverlay();
+        } else {
+            console.log('❌ 未发现auth-required=true，继续认证检查');
+            // 执行认证检查
+            const isAuthenticated = await userAuth.checkAuth();
+            if (!isAuthenticated) {
+                console.log('🔐 认证失败，显示登录遮罩');
+                userAuth.showLoginOverlay();
+            }
+        }
+    } catch (error) {
+        console.error('❌ main.js 初始化失败:', error);
+        // 如果main.js初始化失败，确保登录遮罩仍然可以显示
+        const loginOverlay = document.getElementById('login-overlay');
+        if (loginOverlay) {
+            console.log('🔧 使用备用方式显示登录遮罩');
+            loginOverlay.style.display = 'flex';
+        }
     }
 
     // 检查用户认证状态

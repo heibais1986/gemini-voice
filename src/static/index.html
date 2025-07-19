@@ -139,6 +139,81 @@
             </div>
         </div>
     </div>
+
+    <!-- 添加调试脚本来检查登录遮罩 -->
+    <script>
+        console.log('🚀 HTML页面开始加载...');
+
+        // 检查登录遮罩元素是否存在
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM内容已加载');
+
+            const loginOverlay = document.getElementById('login-overlay');
+            console.log('🔍 登录遮罩元素:', loginOverlay);
+
+            if (loginOverlay) {
+                console.log('✅ 找到登录遮罩元素');
+                console.log('📏 遮罩样式:', window.getComputedStyle(loginOverlay).display);
+
+                // 简单的登录检查逻辑作为备用
+                const sessionToken = localStorage.getItem('sessionToken') || getCookie('sessionToken');
+                console.log('🎫 会话令牌:', sessionToken ? '存在' : '不存在');
+
+                if (!sessionToken) {
+                    console.log('❌ 没有会话令牌，显示登录遮罩');
+                    loginOverlay.style.display = 'flex';
+                } else {
+                    console.log('✅ 有会话令牌，隐藏登录遮罩');
+                    loginOverlay.style.display = 'none';
+                }
+
+                // 绑定登录按钮
+                const goLoginBtn = document.getElementById('go-login');
+                if (goLoginBtn) {
+                    goLoginBtn.addEventListener('click', function() {
+                        console.log('🔗 跳转到登录页面');
+                        window.location.href = '/login.html';
+                    });
+                }
+            } else {
+                console.error('❌ 找不到登录遮罩元素');
+            }
+
+            function getCookie(name) {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [cookieName, cookieValue] = cookie.trim().split('=');
+                    if (cookieName === name) {
+                        return decodeURIComponent(cookieValue);
+                    }
+                }
+                return null;
+            }
+        });
+    </script>
+
+    <!-- 主模块脚本 -->
     <script type="module" src="js/main.js"></script>
+
+    <!-- 备用登录检查脚本 -->
+    <script>
+        // 检测main.js是否成功加载
+        setTimeout(function() {
+            if (typeof window.userAuth === 'undefined') {
+                console.log('⚠️ main.js可能加载失败，加载备用脚本');
+                const fallbackScript = document.createElement('script');
+                fallbackScript.src = 'js/login-fallback.js';
+                fallbackScript.onload = function() {
+                    console.log('✅ 备用登录脚本已加载');
+                };
+                fallbackScript.onerror = function() {
+                    console.error('❌ 备用登录脚本加载失败');
+                };
+                document.head.appendChild(fallbackScript);
+            } else {
+                console.log('✅ main.js已成功加载');
+            }
+        }, 2000); // 2秒后检查
+    </script>
 </body>
 </html>
