@@ -328,6 +328,11 @@ function initializeDOMElements() {
     micIcon = document.getElementById('mic-icon');
     audioVisualizer = document.getElementById('audio-visualizer');
     connectButton = document.getElementById('connect-button');
+    console.log('🔗 初始化连接按钮:', connectButton);
+    if (connectButton) {
+        console.log('📏 连接按钮文本:', connectButton.textContent);
+        console.log('📏 连接按钮是否禁用:', connectButton.disabled);
+    }
     cameraButton = document.getElementById('camera-button');
     cameraIcon = document.getElementById('camera-icon');
     stopVideoButton = document.getElementById('stop-video');
@@ -342,6 +347,7 @@ function initializeDOMElements() {
         console.log('📏 API Key输入框初始样式:', apiKeyInput.style.display);
         console.log('📏 API Key输入框计算样式:', window.getComputedStyle(apiKeyInput).display);
     }
+
     voiceSelect = document.getElementById('voice-select');
     languageSelect = document.getElementById('language-select');
     fpsInput = document.getElementById('fps-input');
@@ -1021,6 +1027,12 @@ function toggleConfig() {
 
 // 绑定事件监听器
 function bindEventListeners() {
+    console.log('🔗 开始绑定事件监听器...');
+    console.log('🔍 检查关键元素:');
+    console.log('  - connectButton:', connectButton);
+    console.log('  - apiKeyInput:', apiKeyInput);
+    console.log('  - userAuth:', userAuth);
+
     if (messageInput) {
         messageInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -1102,6 +1114,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 绑定事件监听器
         console.log('🔗 绑定事件监听器...');
         bindEventListeners();
+
+        // 暴露关键函数和变量到全局作用域，便于调试
+        window.connectToWebsocketWithAuth = connectToWebsocketWithAuth;
+        window.connectButton = connectButton;
+        window.apiKeyInput = apiKeyInput;
+        window.isConnected = isConnected;
+        console.log('🌐 已暴露调试变量到全局作用域');
 
         // 检查服务器是否要求认证
         const authRequired = document.querySelector('meta[name="auth-required"]');
