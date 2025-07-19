@@ -92,6 +92,8 @@ class UserAuthManager {
                     this.currentUser = data.user;
                     this.isAuthenticated = true;
                     this.updateUserUI();
+
+                    // 确保登录遮罩隐藏
                     this.hideLoginOverlay();
 
                     // 登录成功后显示信息弹窗
@@ -163,8 +165,16 @@ class UserAuthManager {
 
             // 同时设置内联样式作为备用
             overlay.style.display = 'none';
+            overlay.style.visibility = 'hidden';
+            overlay.style.opacity = '0';
 
             console.log('✅ 登录遮罩已隐藏');
+            console.log('📏 遮罩当前状态:', {
+                display: overlay.style.display,
+                visibility: overlay.style.visibility,
+                opacity: overlay.style.opacity,
+                className: overlay.className
+            });
         } else {
             console.error('❌ 找不到login-overlay元素');
         }
@@ -1058,6 +1068,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             userAuth.showLoginOverlay();
         } else {
             console.log('❌ 未发现auth-required=true，继续认证检查');
+
+            // 检查是否刚刚登录成功
+            const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+            if (justLoggedIn) {
+                console.log('🎉 检测到刚刚登录成功，清除标记');
+                sessionStorage.removeItem('justLoggedIn');
+                // 确保登录遮罩隐藏
+                userAuth.hideLoginOverlay();
+            }
+
+            // 首先检查是否有会话令牌，如果没有则立即显示登录遮罩
+            const sessionToken = userAuth.getSessionTokenFromCookie() || localStorage.getItem('sessionToken');
+            if (!sessionToken) {
+                console.log('❌ 没有会话令牌，立即显示登录遮罩');
+                userAuth.showLoginOverlay();
+                return;
+            }
+
+            // 有会话令牌，先隐藏登录遮罩，然后验证令牌
+            console.log('🎫 发现会话令牌，先隐藏登录遮罩');
+            userAuth.hideLoginOverlay();
+
             // 执行认证检查（只在这里执行一次）
             const isAuthenticated = await userAuth.checkAuth();
             if (!isAuthenticated) {

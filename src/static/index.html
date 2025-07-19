@@ -152,30 +152,6 @@
 
             if (loginOverlay) {
                 console.log('✅ 找到登录遮罩元素');
-                console.log('📏 遮罩样式:', window.getComputedStyle(loginOverlay).display);
-
-                // 简单的登录检查逻辑作为备用
-                const sessionToken = localStorage.getItem('sessionToken') || getCookie('sessionToken');
-                console.log('🎫 会话令牌:', sessionToken ? '存在' : '不存在');
-
-                if (!sessionToken) {
-                    console.log('❌ 没有会话令牌，显示登录遮罩');
-                    loginOverlay.style.display = 'flex';
-                } else {
-                    console.log('✅ 有会话令牌，隐藏登录遮罩');
-                    loginOverlay.style.display = 'none';
-
-                    // 检查API Key输入框
-                    const apiKeyInput = document.getElementById('api-key');
-                    console.log('🔑 API Key输入框元素:', apiKeyInput);
-                    if (apiKeyInput) {
-                        console.log('📏 API Key输入框样式:', window.getComputedStyle(apiKeyInput).display);
-                        console.log('📏 API Key输入框内联样式:', apiKeyInput.style.display);
-                        // 确保显示API Key输入框
-                        apiKeyInput.style.display = 'block';
-                        console.log('✅ 强制显示API Key输入框');
-                    }
-                }
 
                 // 绑定登录按钮
                 const goLoginBtn = document.getElementById('go-login');
@@ -184,6 +160,16 @@
                         console.log('🔗 跳转到登录页面');
                         window.location.href = '/login.html';
                     });
+                }
+
+                // 不在这里立即检查认证状态，等待main.js加载完成后处理
+                console.log('⏳ 等待main.js加载完成后处理认证状态...');
+
+                // 确保API Key输入框可见（不依赖认证状态）
+                const apiKeyInput = document.getElementById('api-key');
+                if (apiKeyInput) {
+                    console.log('🔑 确保API Key输入框可见');
+                    apiKeyInput.style.display = 'block';
                 }
             } else {
                 console.error('❌ 找不到登录遮罩元素');

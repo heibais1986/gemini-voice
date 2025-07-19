@@ -31,13 +31,19 @@
         console.log('🎫 备用脚本：会话令牌', sessionToken ? '存在' : '不存在');
         
         if (!sessionToken) {
+            console.log('❌ 备用脚本：没有会话令牌，显示登录遮罩');
             showLoginOverlay();
         } else {
+            console.log('🎫 备用脚本：发现会话令牌，先隐藏登录遮罩');
+            hideLoginOverlay();
+
             // 验证令牌有效性
             validateToken(sessionToken).then(isValid => {
                 if (!isValid) {
+                    console.log('❌ 备用脚本：令牌无效，显示登录遮罩');
                     showLoginOverlay();
                 } else {
+                    console.log('✅ 备用脚本：令牌有效，保持遮罩隐藏');
                     hideLoginOverlay();
                 }
             }).catch(error => {

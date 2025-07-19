@@ -272,6 +272,9 @@ class LoginManager {
 
         this.showMessage('登录成功！', 'success');
 
+        // 设置登录成功标记，避免主页面重复显示登录遮罩
+        sessionStorage.setItem('justLoggedIn', 'true');
+
         // 延迟跳转到主页
         setTimeout(() => {
             console.log('🔄 跳转到主页...');
