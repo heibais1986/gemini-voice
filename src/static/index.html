@@ -30,7 +30,7 @@
                 <button id="user-menu" class="material-symbols-outlined">account_circle</button>
             </div>
             <!-- API Key 输入（所有用户都需要） -->
-            <input type="password" id="api-key" placeholder="请输入 Gemini API Key" style="display: none;" />
+            <input type="password" id="api-key" placeholder="请输入 Gemini API Key" style="display: block;" />
             <button id="config-toggle" class="material-symbols-outlined">settings</button>
         </div>
         <div id="config-container">
@@ -164,6 +164,17 @@
                 } else {
                     console.log('✅ 有会话令牌，隐藏登录遮罩');
                     loginOverlay.style.display = 'none';
+
+                    // 检查API Key输入框
+                    const apiKeyInput = document.getElementById('api-key');
+                    console.log('🔑 API Key输入框元素:', apiKeyInput);
+                    if (apiKeyInput) {
+                        console.log('📏 API Key输入框样式:', window.getComputedStyle(apiKeyInput).display);
+                        console.log('📏 API Key输入框内联样式:', apiKeyInput.style.display);
+                        // 确保显示API Key输入框
+                        apiKeyInput.style.display = 'block';
+                        console.log('✅ 强制显示API Key输入框');
+                    }
                 }
 
                 // 绑定登录按钮

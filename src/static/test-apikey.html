@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key 输入框测试</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .log-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-error { color: #dc3545; }
+        .log-success { color: #28a745; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+        .api-key-test {
+            border: 2px solid #007bff;
+            background: #f0f8ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>API Key 输入框测试页面</h1>
+        <p>这个页面用于测试API Key输入框的显示和功能。</p>
+        
+        <!-- 复制主页面的设置区域 -->
+        <div class="test-section api-key-test">
+            <h3>主页面设置区域复制</h3>
+            <div class="settings">
+                <!-- 用户信息显示 -->
+                <div id="user-info" class="user-info" style="display: none;">
+                    <img id="user-avatar" class="user-avatar" src="" alt="用户头像">
+                    <span id="user-name" class="user-name">测试用户</span>
+                    <button id="user-menu" class="material-symbols-outlined">account_circle</button>
+                </div>
+                <!-- API Key 输入（所有用户都需要） -->
+                <input type="password" id="api-key" placeholder="请输入 Gemini API Key" style="display: block;" />
+                <button id="config-toggle" class="material-symbols-outlined">settings</button>
+            </div>
+        </div>
+        
+        <!-- 测试控制 -->
+        <div class="test-section">
+            <h3>测试控制</h3>
+            <button class="test-button" onclick="showUserInfo()">显示用户信息</button>
+            <button class="test-button" onclick="hideUserInfo()">隐藏用户信息</button>
+            <button class="test-button" onclick="showApiKey()">显示API Key输入框</button>
+            <button class="test-button" onclick="hideApiKey()">隐藏API Key输入框</button>
+            <button class="test-button" onclick="checkElements()">检查元素状态</button>
+            <button class="test-button" onclick="simulateLogin()">模拟登录</button>
+            <button class="test-button" onclick="clearLog()">清空日志</button>
+        </div>
+        
+        <!-- 状态显示 -->
+        <div class="test-section">
+            <h3>当前状态</h3>
+            <p>用户信息显示: <span id="user-info-status">检查中...</span></p>
+            <p>API Key输入框: <span id="api-key-status">检查中...</span></p>
+            <p>API Key值: <span id="api-key-value">检查中...</span></p>
+        </div>
+        
+        <div class="log-container" id="log-container">
+            <div class="log-entry log-info">测试页面已加载，等待操作...</div>
+        </div>
+    </div>
+
+    <script>
+        // 测试函数
+        function showUserInfo() {
+            log('显示用户信息...', 'info');
+            const userInfo = document.getElementById('user-info');
+            if (userInfo) {
+                userInfo.style.display = 'flex';
+                document.getElementById('user-name').textContent = '测试用户';
+                log('用户信息已显示', 'success');
+            } else {
+                log('找不到用户信息元素', 'error');
+            }
+            updateStatus();
+        }
+        
+        function hideUserInfo() {
+            log('隐藏用户信息...', 'info');
+            const userInfo = document.getElementById('user-info');
+            if (userInfo) {
+                userInfo.style.display = 'none';
+                log('用户信息已隐藏', 'success');
+            } else {
+                log('找不到用户信息元素', 'error');
+            }
+            updateStatus();
+        }
+        
+        function showApiKey() {
+            log('显示API Key输入框...', 'info');
+            const apiKeyInput = document.getElementById('api-key');
+            if (apiKeyInput) {
+                apiKeyInput.style.display = 'block';
+                log('API Key输入框已显示', 'success');
+            } else {
+                log('找不到API Key输入框元素', 'error');
+            }
+            updateStatus();
+        }
+        
+        function hideApiKey() {
+            log('隐藏API Key输入框...', 'info');
+            const apiKeyInput = document.getElementById('api-key');
+            if (apiKeyInput) {
+                apiKeyInput.style.display = 'none';
+                log('API Key输入框已隐藏', 'warning');
+            } else {
+                log('找不到API Key输入框元素', 'error');
+            }
+            updateStatus();
+        }
+        
+        function checkElements() {
+            log('检查页面元素...', 'info');
+            
+            const userInfo = document.getElementById('user-info');
+            const apiKeyInput = document.getElementById('api-key');
+            
+            log('用户信息元素: ' + (userInfo ? '存在' : '不存在'), userInfo ? 'success' : 'error');
+            log('API Key输入框元素: ' + (apiKeyInput ? '存在' : '不存在'), apiKeyInput ? 'success' : 'error');
+            
+            if (userInfo) {
+                const computedStyle = window.getComputedStyle(userInfo);
+                log('用户信息计算样式: display=' + computedStyle.display + ', visibility=' + computedStyle.visibility, 'info');
+                log('用户信息内联样式: ' + userInfo.style.cssText, 'info');
+            }
+            
+            if (apiKeyInput) {
+                const computedStyle = window.getComputedStyle(apiKeyInput);
+                log('API Key计算样式: display=' + computedStyle.display + ', visibility=' + computedStyle.visibility, 'info');
+                log('API Key内联样式: ' + apiKeyInput.style.cssText, 'info');
+                log('API Key值: ' + (apiKeyInput.value || '(空)'), 'info');
+            }
+            
+            updateStatus();
+        }
+        
+        function simulateLogin() {
+            log('模拟登录流程...', 'info');
+            
+            // 模拟 updateUserUI 函数的逻辑
+            const userInfo = document.getElementById('user-info');
+            const apiKeyInput = document.getElementById('api-key');
+            const userName = document.getElementById('user-name');
+            
+            // 显示用户信息
+            if (userInfo) {
+                userInfo.style.display = 'flex';
+                log('用户信息已显示', 'success');
+            }
+            
+            if (userName) {
+                userName.textContent = '模拟用户';
+                log('用户名已设置', 'success');
+            }
+            
+            // 显示API Key输入框
+            if (apiKeyInput) {
+                apiKeyInput.style.display = 'block';
+                log('API Key输入框已显示', 'success');
+            } else {
+                log('找不到API Key输入框', 'error');
+            }
+            
+            updateStatus();
+        }
+        
+        function clearLog() {
+            document.getElementById('log-container').innerHTML = '';
+        }
+        
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-' + type;
+            logEntry.textContent = '[' + timestamp + '] ' + message;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus() {
+            // 检查用户信息
+            const userInfo = document.getElementById('user-info');
+            if (userInfo) {
+                const isVisible = userInfo.style.display !== 'none';
+                document.getElementById('user-info-status').textContent = isVisible ? '显示中' : '已隐藏';
+            } else {
+                document.getElementById('user-info-status').textContent = '元素不存在';
+            }
+            
+            // 检查API Key输入框
+            const apiKeyInput = document.getElementById('api-key');
+            if (apiKeyInput) {
+                const isVisible = apiKeyInput.style.display !== 'none';
+                document.getElementById('api-key-status').textContent = isVisible ? '显示中' : '已隐藏';
+                document.getElementById('api-key-value').textContent = apiKeyInput.value || '(空)';
+            } else {
+                document.getElementById('api-key-status').textContent = '元素不存在';
+                document.getElementById('api-key-value').textContent = '无法检查';
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('测试页面DOM已加载', 'success');
+            updateStatus();
+            
+            // 定期更新状态
+            setInterval(updateStatus, 5000);
+        });
+    </script>
+</body>
+</html>

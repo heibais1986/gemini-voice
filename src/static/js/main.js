@@ -171,12 +171,17 @@ class UserAuthManager {
     }
 
     updateUserUI() {
+        console.log('🔄 updateUserUI() 开始执行...');
         const userInfo = document.getElementById('user-info');
         const userAvatar = document.getElementById('user-avatar');
         const userName = document.getElementById('user-name');
         const apiKeyInput = document.getElementById('api-key');
 
+        console.log('🔍 API Key输入框元素:', apiKeyInput);
+        console.log('👤 当前用户:', this.currentUser);
+
         if (this.currentUser) {
+            console.log('✅ 有用户信息，显示用户界面');
             userInfo.style.display = 'flex';
             userName.textContent = this.currentUser.username || '用户';
 
@@ -185,10 +190,20 @@ class UserAuthManager {
             }
 
             // 所有用户都显示API Key输入框
-            apiKeyInput.style.display = 'block';
+            if (apiKeyInput) {
+                apiKeyInput.style.display = 'block';
+                console.log('✅ API Key输入框已设置为显示');
+                console.log('📏 API Key输入框当前样式:', apiKeyInput.style.display);
+            } else {
+                console.error('❌ 找不到API Key输入框元素');
+            }
         } else {
+            console.log('❌ 没有用户信息，隐藏用户界面');
             userInfo.style.display = 'none';
-            apiKeyInput.style.display = 'block';
+            if (apiKeyInput) {
+                apiKeyInput.style.display = 'block';
+                console.log('✅ API Key输入框已设置为显示（未登录状态）');
+            }
         }
     }
 
@@ -312,6 +327,11 @@ function initializeDOMElements() {
     screenPreview = document.getElementById('screen-preview');
     inputAudioVisualizer = document.getElementById('input-audio-visualizer');
     apiKeyInput = document.getElementById('api-key');
+    console.log('🔑 初始化API Key输入框:', apiKeyInput);
+    if (apiKeyInput) {
+        console.log('📏 API Key输入框初始样式:', apiKeyInput.style.display);
+        console.log('📏 API Key输入框计算样式:', window.getComputedStyle(apiKeyInput).display);
+    }
     voiceSelect = document.getElementById('voice-select');
     languageSelect = document.getElementById('language-select');
     fpsInput = document.getElementById('fps-input');
