@@ -255,17 +255,22 @@ class LoginManager {
     }
 
     handleLoginSuccess(data) {
+        console.log('🎉 处理登录成功:', data);
+
         // 保存会话令牌
         localStorage.setItem('sessionToken', data.sessionToken);
+        console.log('💾 会话令牌已保存到localStorage');
 
-        // 设置Cookie
-        const expires = new Date(data.expiresAt);
-        document.cookie = `sessionToken=${encodeURIComponent(data.sessionToken)}; path=/; expires=${expires.toUTCString()}; secure; samesite=strict`;
+        // 设置Cookie（7天过期）
+        const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        document.cookie = `sessionToken=${encodeURIComponent(data.sessionToken)}; path=/; expires=${expires.toUTCString()}; samesite=strict`;
+        console.log('🍪 会话令牌已保存到Cookie');
 
         this.showMessage('登录成功！', 'success');
 
         // 延迟跳转到主页
         setTimeout(() => {
+            console.log('🔄 跳转到主页...');
             window.location.href = '/';
         }, 1000);
     }

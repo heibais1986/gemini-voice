@@ -56,6 +56,9 @@ class UserAuthManager {
     async checkAuth() {
         console.log('🔐 checkAuth() 开始执行...');
         console.log('📍 当前路径:', window.location.pathname);
+
+        // 重新获取最新的sessionToken（可能在登录后更新了）
+        this.sessionToken = this.getSessionTokenFromCookie() || localStorage.getItem('sessionToken');
         console.log('🎫 当前sessionToken:', this.sessionToken ? '存在' : '不存在');
 
         // 首先检查页面是否有auth-required meta标签
@@ -65,7 +68,7 @@ class UserAuthManager {
             this.showLoginOverlay();
             return false;
         }
-        
+
         // 如果后端已经重定向到登录页，说明认证失败，不需要前端再次检查
         if (window.location.pathname === '/login.html') {
             console.log('📄 当前在登录页，跳过认证检查');
@@ -84,15 +87,17 @@ class UserAuthManager {
                 console.log('📡 API响应状态:', response.status);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('📋 API响应数据:', data);
+
                     this.currentUser = data.user;
                     this.isAuthenticated = true;
                     this.updateUserUI();
                     this.hideLoginOverlay();
-                    
+
                     // 登录成功后显示信息弹窗
                     console.log('🎯 准备显示信息弹窗...');
                     this.showInfoModal();
-                    
+
                     console.log('✅ 认证成功，用户:', data.user.username);
                     return true;
                 } else {
@@ -104,6 +109,7 @@ class UserAuthManager {
                 }
             } catch (error) {
                 console.error('❌ 认证检查失败:', error);
+                this.clearSessionToken();
                 this.showLoginOverlay();
                 return false;
             }
@@ -1025,11 +1031,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             userAuth.showLoginOverlay();
         } else {
             console.log('❌ 未发现auth-required=true，继续认证检查');
-            // 执行认证检查
+            // 执行认证检查（只在这里执行一次）
             const isAuthenticated = await userAuth.checkAuth();
             if (!isAuthenticated) {
                 console.log('🔐 认证失败，显示登录遮罩');
                 userAuth.showLoginOverlay();
+            } else {
+                console.log('✅ 认证成功，用户已登录');
             }
         }
     } catch (error) {
@@ -1041,10 +1049,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             loginOverlay.style.display = 'flex';
         }
     }
-
-    // 检查用户认证状态
-    console.log('🔐 开始用户认证检查...');
-    await userAuth.checkAuth();
 
     // 初始状态设置
     if (micButton) micButton.disabled = true;

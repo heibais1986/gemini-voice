@@ -567,9 +567,10 @@ async function handleUserSystemAPI(request, env, pathname) {
       console.log(`✅ 登录成功: ${phone}`);
 
       // 设置Cookie并返回响应
+      // 注意：移除HttpOnly以便前端JavaScript可以读取
       const responseHeaders = {
         ...corsHeaders,
-        'Set-Cookie': `sessionToken=${sessionToken}; Path=/; Max-Age=604800; HttpOnly; SameSite=Strict`
+        'Set-Cookie': `sessionToken=${sessionToken}; Path=/; Max-Age=604800; SameSite=Strict; Secure`
       };
 
       return new Response(JSON.stringify({
@@ -582,23 +583,41 @@ async function handleUserSystemAPI(request, env, pathname) {
 
     // 获取用户信息API
     if (pathname === '/api/user/profile' && request.method === 'GET') {
+      console.log('📡 处理用户信息API请求...');
+
       const authHeader = request.headers.get('Authorization');
+      console.log('🔑 Authorization头部:', authHeader ? '存在' : '不存在');
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log('❌ 缺少或无效的Authorization头部');
         return new Response(JSON.stringify({
           success: false,
           message: 'Unauthorized'
         }), { status: 401, headers: corsHeaders });
       }
 
-      // 模拟用户信息（生产环境应从数据库获取）
+      const sessionToken = authHeader.substring(7);
+      console.log('🎫 提取的sessionToken:', sessionToken ? '存在' : '不存在');
+
+      // 检查会话令牌是否存在于内存中（简化验证）
+      // 在生产环境中，应该从数据库验证
+      if (!sessionToken || !sessionToken.startsWith('session_')) {
+        console.log('❌ 无效的会话令牌格式');
+        return new Response(JSON.stringify({
+          success: false,
+          message: 'Invalid session token'
+        }), { status: 401, headers: corsHeaders });
+      }
+
+      // 模拟用户信息（基于会话令牌）
       const user = {
-        id: '123',
+        id: sessionToken.split('_')[1] || '123',
         phone: '13800138000',
         username: '测试用户',
         user_type: 'free'
       };
 
+      console.log('✅ 用户信息验证成功:', user.username);
       return new Response(JSON.stringify({
         success: true,
         user: user

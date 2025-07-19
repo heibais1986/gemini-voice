@@ -109,19 +109,22 @@
     
     async function validateToken(token) {
         try {
-            const response = await fetch('/api/auth/validate', {
-                method: 'POST',
+            console.log('🔍 备用脚本：验证令牌...');
+            const response = await fetch('/api/user/profile', {
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
             });
-            
+
+            console.log('📡 备用脚本：API响应状态:', response.status);
             if (response.ok) {
                 const data = await response.json();
-                return data.valid === true;
+                console.log('✅ 备用脚本：令牌验证成功');
+                return data.success === true;
             }
-            
+
+            console.log('❌ 备用脚本：令牌验证失败');
             return false;
         } catch (error) {
             console.error('备用脚本：令牌验证请求失败', error);

@@ -63,6 +63,7 @@
             <button class="test-button" onclick="hideOverlay()">隐藏登录遮罩</button>
             <button class="test-button" onclick="clearToken()">清除会话令牌</button>
             <button class="test-button" onclick="setToken()">设置会话令牌</button>
+            <button class="test-button" onclick="testAPI()">测试API验证</button>
             <button class="test-button" onclick="checkElements()">检查页面元素</button>
             <button class="test-button" onclick="clearLog()">清空日志</button>
         </div>
@@ -127,8 +128,14 @@
         }
         
         function setToken() {
-            const token = 'test-token-' + Date.now();
+            // 使用与登录API相同的格式
+            const token = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('sessionToken', token);
+
+            // 同时设置Cookie
+            const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+            document.cookie = `sessionToken=${encodeURIComponent(token)}; path=/; expires=${expires.toUTCString()}; samesite=strict`;
+
             log('会话令牌已设置: ' + token, 'success');
             updateStatus();
         }
@@ -152,6 +159,38 @@
             updateStatus();
         }
         
+        async function testAPI() {
+            log('测试API验证...', 'info');
+            const token = localStorage.getItem('sessionToken') || getCookie('sessionToken');
+
+            if (!token) {
+                log('没有会话令牌，无法测试API', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                log('API响应状态: ' + response.status, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('API响应数据: ' + JSON.stringify(data, null, 2), 'success');
+                } else {
+                    const errorText = await response.text();
+                    log('API错误响应: ' + errorText, 'error');
+                }
+            } catch (error) {
+                log('API请求失败: ' + error.message, 'error');
+            }
+
+            updateStatus();
+        }
+
         function clearLog() {
             document.getElementById('log-container').innerHTML = '';
         }
