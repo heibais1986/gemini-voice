@@ -79,7 +79,7 @@ export class ApplicationError extends Error {
             stack: this.stack
         };
     }
-} 
+
     /**
      * Converts the error object to a JSON representation.
      *
@@ -94,4 +94,5 @@ export class ApplicationError extends Error {
             timestamp: this.timestamp,
             stack: this.stack
         };
-    } 
+    }
+}

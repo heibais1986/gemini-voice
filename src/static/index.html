@@ -221,9 +221,16 @@
                 };
                 document.head.appendChild(fallbackScript);
             } else {
-                console.log('✅ main.js已成功加载');
+                console.log('✅ main.js已成功加载，userAuth可用');
+
+                // 确保API Key输入框显示
+                const apiKeyInput = document.getElementById('api-key');
+                if (apiKeyInput && window.userAuth && window.userAuth.isAuthenticated) {
+                    console.log('🔑 确保已登录用户的API Key输入框显示');
+                    apiKeyInput.style.display = 'block';
+                }
             }
-        }, 2000); // 2秒后检查
+        }, 3000); // 增加到3秒，给模块更多加载时间
     </script>
 </body>
 </html>
